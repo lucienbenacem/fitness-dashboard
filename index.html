@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Fitness Credits</title>
+  <style>
+    :root {
+      --bg: #0f0f0f;
+      --surface: #1a1a1a;
+      --surface2: #242424;
+      --border: #2e2e2e;
+      --text: #f0f0f0;
+      --muted: #888;
+      --barrys: #e8342a;
+      --othership: #c97c3a;
+      --avant: #8b6fd4;
+      --rumble: #d4284a;
+      --green: #4caf7d;
+      --yellow: #f5c842;
+      --red: #e8342a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+    }
+    #login-screen {
+      position: fixed; inset: 0;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 32px 24px;
+    }
+    .login-logo { font-size: 28px; font-weight: 800; letter-spacing: -1px; margin-bottom: 6px; }
+    .login-logo span { opacity: 0.4; font-weight: 400; }
+    .login-sub { font-size: 13px; color: var(--muted); margin-bottom: 40px; }
+    .login-box { width: 100%; max-width: 320px; }
+    .login-label { font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; display: block; }
+    .login-input { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; color: var(--text); font-size: 18px; padding: 14px 16px; letter-spacing: 3px; margin-bottom: 14px; outline: none; transition: border-color 0.2s; }
+    .login-input:focus { border-color: var(--avant); }
+    .login-input.shake { animation: shake 0.4s ease; border-color: var(--red); }
+    @keyframes shake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-8px); } 40% { transform: translateX(8px); } 60% { transform: translateX(-6px); } 80% { transform: translateX(6px); } }
+    .login-btn { width: 100%; background: var(--avant); border: none; border-radius: 12px; color: #fff; font-size: 15px; font-weight: 700; padding: 14px; cursor: pointer; letter-spacing: 0.3px; transition: opacity 0.2s; }
+    .login-btn:active { opacity: 0.7; }
+    .login-error { font-size: 12px; color: var(--red); text-align: center; margin-top: 10px; min-height: 18px; }
+    .login-dots { display: flex; gap: 8px; justify-content: center; margin-top: 32px; }
+    .login-dot { width: 6px; height: 6px; border-radius: 50%; opacity: 0.2; }
+    .login-dot.barrys { background: var(--barrys); }
+    .login-dot.othership { background: var(--othership); }
+    .login-dot.avant { background: var(--avant); }
+    .login-dot.rumble { background: var(--rumble); }
+    #dashboard { display: none; padding: 16px; max-width: 480px; margin: 0 auto; }
+    #dashboard.visible { display: block; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+    .header-title { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+    .header-title span { opacity: 0.5; font-weight: 400; }
+    .last-updated { font-size: 11px; color: var(--muted); text-align: right; }
+    .lock-btn { background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 8px; padding: 5px 10px; font-size: 12px; cursor: pointer; }
+    .cards { display: flex; flex-direction: column; gap: 12px; }
+    .card { background: var(--surface); border-radius: 16px; padding: 18px; border: 1px solid var(--border); position: relative; overflow: hidden; }
+    .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+    .card.barrys::before { background: var(--barrys); }
+    .card.othership::before { background: var(--othership); }
+    .card.avant::before { background: var(--avant); }
+    .card.rumble::before { background: var(--rumble); }
+    .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+    .studio-name { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.5; }
+    .status-pill { font-size: 10px; font-weight: 600; letter-spacing: 0.5px; padding: 3px 8px; border-radius: 20px; text-transform: uppercase; }
+    .status-active { background: #1a3326; color: var(--green); }
+    .status-warning { background: #2e2510; color: var(--yellow); }
+    .status-low { background: #2e1010; color: var(--red); }
+    .credit-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 10px; }
+    .credit-count { font-size: 48px; font-weight: 800; line-height: 1; letter-spacing: -2px; }
+    .credit-label { font-size: 14px; color: var(--muted); margin-bottom: 2px; }
+    .credit-of { font-size: 16px; color: var(--muted); font-weight: 400; }
+    .progress-wrap { background: var(--surface2); border-radius: 4px; height: 5px; margin-bottom: 10px; overflow: hidden; }
+    .progress-bar { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+    .barrys .progress-bar { background: var(--barrys); }
+    .othership .progress-bar { background: var(--othership); }
+    .avant .progress-bar { background: var(--avant); }
+    .rumble .progress-bar { background: var(--rumble); }
+    .meta-row { display: flex; justify-content: space-between; align-items: center; }
+    .meta-item { display: flex; flex-direction: column; gap: 2px; }
+    .meta-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
+    .meta-value { font-size: 13px; font-weight: 600; }
+    .meta-value.urgent { color: var(--red); }
+    .meta-value.warn { color: var(--yellow); }
+    .meta-value.ok { color: var(--green); }
+    .card-divider { height: 1px; background: var(--border); margin: 12px 0; }
+    .frozen-notice { display: flex; align-items: center; gap: 8px; margin-top: 10px; background: rgba(111,160,224,0.08); border: 1px solid rgba(111,160,224,0.2); border-radius: 8px; padding: 8px 10px; font-size: 11px; color: #6fa0e0; }
+    .membership-badge { font-size: 28px; font-weight: 800; letter-spacing: -1px; margin-bottom: 4px; }
+    .membership-sub { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+    .renewal-row { display: flex; justify-content: space-between; margin-bottom: 14px; }
+    .perk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
+    .perk-card { background: var(--surface2); border-radius: 10px; padding: 12px; border: 1px solid var(--border); }
+    .perk-name { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+    .perk-count { font-size: 28px; font-weight: 800; letter-spacing: -1px; line-height: 1; }
+    .perk-cycle { font-size: 10px; color: var(--muted); margin-top: 2px; }
+    .perk-bar-wrap { background: var(--border); border-radius: 3px; height: 3px; margin-top: 8px; overflow: hidden; }
+    .perk-bar { height: 100%; border-radius: 3px; background: var(--avant); transition: width 0.5s ease; }
+    .upcoming-classes { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .class-pill { background: var(--surface2); border-radius: 20px; padding: 4px 10px; font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 5px; }
+    .class-dot { width: 6px; height: 6px; border-radius: 50%; }
+    .footer { margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border); text-align: center; font-size: 11px; color: var(--muted); }
+    @media (min-width: 400px) { #dashboard { padding: 20px; } }
+  </style>
+</head>
+<body>
+<div id="login-screen">
+  <div class="login-logo">Fitness <span>Credits</span></div>
+  <div class="login-sub">Lucien's workout tracker</div>
+  <div class="login-box">
+    <label class="login-label" for="pass-input">Passcode</label>
+    <input class="login-input" id="pass-input" type="password" placeholder="\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022" autocomplete="current-password" autofocus />
+    <button class="login-btn" onclick="doLogin()">Unlock</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+  <div class="login-dots">
+    <div class="login-dot barrys"></div>
+    <div class="login-dot othership"></div>
+    <div class="login-dot avant"></div>
+    <div class="login-dot rumble"></div>
+  </div>
+</div>
+<div id="dashboard">
+  <div class="header">
+    <div>
+      <div class="header-title">Fitness <span>Credits</span></div>
+      <div class="last-updated" id="lastUpdated">Updated just now</div>
+    </div>
+    <button class="lock-btn" onclick="doLock()">🔒 Lock</button>
+  </div>
+  <div class="cards">
+    <div class="card barrys">
+      <div class="card-top"><div class="studio-name">Barry's</div><div class="status-pill" id="barrys-status">Active</div></div>
+      <div class="credit-row"><div class="credit-count" id="barrys-credits">13</div><div><div class="credit-label">credits left</div><div class="credit-of" id="barrys-of">of 20</div></div></div>
+      <div class="progress-wrap"><div class="progress-bar" id="barrys-bar" style="width:65%"></div></div>
+      <div class="meta-row"><div class="meta-item"><div class="meta-label">Expires</div><div class="meta-value" id="barrys-expiry">Dec 10, 2026</div></div><div class="meta-item" style="text-align:right"><div class="meta-label">Package</div><div class="meta-value" style="font-size:11px;color:var(--muted)">20 Classes \u00b7 Holiday Sale</div></div></div>
+      <div class="upcoming-classes"><div class="class-pill"><div class="class-dot" style="background:var(--barrys)"></div>Sat 10:10am booked</div></div>
+    </div>
+    <div class="card othership">
+      <div class="card-top"><div class="studio-name">Othership</div><div class="status-pill status-active" id="othership-status">Active</div></div>
+      <div class="credit-row"><div class="credit-count" id="othership-credits">6</div><div><div class="credit-label">credits left</div><div class="credit-of" id="othership-of">of 10</div></div></div>
+      <div class="progress-wrap"><div class="progress-bar" id="othership-bar" style="width:60%"></div></div>
+      <div class="meta-row"><div class="meta-item"><div class="meta-label">Expires</div><div class="meta-value" id="othership-expiry">May 27, 2026</div></div><div class="meta-item" style="text-align:right"><div class="meta-label">Package</div><div class="meta-value" style="font-size:11px;color:var(--muted)">Toronto 10 Pack</div></div></div>
+      <div class="upcoming-classes"><div class="class-pill"><div class="class-dot" style="background:var(--othership)"></div>Fri Mar 20 \u00b7 7:45pm Sauna</div></div>
+      <div class="card-divider"></div>
+      <div class="frozen-notice"><span>\u2744\ufe0f</span><div>4x Monthly Membership frozen \u00b7 unfreezes <strong>May 13, 2026</strong></div></div>
+    </div>
+    <div class="card avant">
+      <div class="card-top"><div class="studio-name">Avant</div><div class="status-pill status-active">Active</div></div>
+      <div class="membership-badge">GARDE</div>
+      <div class="membership-sub">AVT Yorkville \u00b7 Biweekly Membership</div>
+      <div class="renewal-row"><div class="meta-item"><div class="meta-label">Next Renewal</div><div class="meta-value" id="avant-renewal">Mar 20, 2026</div></div><div class="meta-item" style="text-align:right"><div class="meta-label">Amount</div><div class="meta-value">$197.75</div></div></div>
+      <div class="perk-grid">
+        <div class="perk-card"><div class="perk-name">Align</div><div class="perk-count" id="avant-align-count">4</div><div class="perk-cycle">of 4 per cycle</div><div class="perk-bar-wrap"><div class="perk-bar" id="avant-align-bar" style="width:100%"></div></div></div>
+        <div class="perk-card"><div class="perk-name">Haven</div><div class="perk-count" id="avant-haven-count">2</div><div class="perk-cycle">of 2 per cycle</div><div class="perk-bar-wrap"><div class="perk-bar" id="avant-haven-bar" style="width:100%"></div></div></div>
+      </div>
+      <div class="upcoming-classes" style="margin-top:10px">
+        <div class="class-pill"><div class="class-dot" style="background:var(--avant)"></div>Sat 12:50pm Vinyasa</div>
+        <div class="class-pill"><div class="class-dot" style="background:var(--avant)"></div>Tue 6pm Precision L3</div>
+        <div class="class-pill"><div class="class-dot" style="background:var(--avant)"></div>Mon 6:30pm LF3 Heavy</div>
+      </div>
+    </div>
+    <div class="card rumble">
+      <div class="card-top"><div class="studio-name">Rumble Boxing</div><div class="status-pill" id="rumble-status">Active</div></div>
+      <div class="credit-row"><div class="credit-count" id="rumble-credits">9</div><div><div class="credit-label">credits left</div><div class="credit-of" id="rumble-of">of 10</div></div></div>
+      <div class="progress-wrap"><div class="progress-bar" id="rumble-bar" style="width:90%"></div></div>
+      <div class="meta-row"><div class="meta-item"><div class="meta-label">Expires</div><div class="meta-value" id="rumble-expiry">Mar 11, 2027</div></div><div class="meta-item" style="text-align:right"><div class="meta-label">Package</div><div class="meta-value" style="font-size:11px;color:var(--muted)">FT Intro 10 Pack</div></div></div>
+    </div>
+  </div>
+  <div class="footer">Auto-refreshed daily \u00b7 Barry's \u00b7 Othership \u00b7 Avant \u00b7 Rumble</div>
+</div>
+<script>
+  const DATA = {lastUpdated:"2026-03-18T19:30:00",barrys:{credits:13,total:20,expiry:"2026-12-10"},othership:{credits:6,total:10,expiry:"2026-05-27"},avant:{nextRenewal:"2026-03-20",amount:197.75,align:{available:4,perCycle:4},haven:{available:2,perCycle:2}},rumble:{credits:9,total:10,expiry:"2027-03-11"}};
+  const PASS_HASH = "8cf9cb7e91de81cd2034caed244460f97334ef154ce07f59e3dda766c38cb6e9";
+  async function sha256(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');}
+  async function doLogin(){const v=document.getElementById('pass-input').value;const h=await sha256(v);if(h===PASS_HASH){sessionStorage.setItem('fc_auth','1');showDashboard();}else{const el=document.getElementById('pass-input');el.classList.add('shake');document.getElementById('login-error').textContent='Incorrect passcode';setTimeout(()=>{el.classList.remove('shake');el.value='';el.focus();},500);}}
+  function doLock(){sessionStorage.removeItem('fc_auth');document.getElementById('dashboard').classList.remove('visible');document.getElementById('login-screen').style.display='flex';document.getElementById('pass-input').value='';document.getElementById('login-error').textContent='';}
+  function showDashboard(){document.getElementById('login-screen').style.display='none';document.getElementById('dashboard').classList.add('visible');render();}
+  document.getElementById('pass-input').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+  function daysUntil(d){if(!d)return null;const t=new Date();t.setHours(0,0,0,0);return Math.ceil((new Date(d)-t)/86400000);}
+  function fmtDate(d){if(!d)return'\u2014';return new Date(d).toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});}
+  function expiryClass(d){const n=daysUntil(d);if(n===null)return'';if(n<30)return'urgent';if(n<90)return'warn';return'ok';}
+  function statusPill(c,t){const p=c/t;if(p<=0.2)return['status-low','Low'];if(p<=0.4)return['status-warning','Running Low'];return['status-active','Active'];}
+  function render(){const d=DATA;const lu=new Date(d.lastUpdated);document.getElementById('lastUpdated').textContent='Updated '+lu.toLocaleDateString('en-CA',{month:'short',day:'numeric'})+' at '+lu.toLocaleTimeString('en-CA',{hour:'numeric',minute:'2-digit'});const[bC,bL]=statusPill(d.barrys.credits,d.barrys.total);document.getElementById('barrys-credits').textContent=d.barrys.credits;document.getElementById('barrys-of').textContent='of '+d.barrys.total;document.getElementById('barrys-bar').style.width=Math.round(d.barrys.credits/d.barrys.total*100)+'%';const bE=document.getElementById('barrys-expiry');bE.textContent=fmtDate(d.barrys.expiry);bE.className='meta-value '+expiryClass(d.barrys.expiry);const bS=document.getElementById('barrys-status');bS.className='status-pill '+bC;bS.textContent=bL;const[oC,oL]=statusPill(d.othership.credits,d.othership.total);document.getElementById('othership-credits').textContent=d.othership.credits;document.getElementById('othership-of').textContent='of '+d.othership.total;document.getElementById('othership-bar').style.width=Math.round(d.othership.credits/d.othership.total*100)+'%';const oE=document.getElementById('othership-expiry');oE.textContent=fmtDate(d.othership.expiry);oE.className='meta-value '+expiryClass(d.othership.expiry);const oS=document.getElementById('othership-status');oS.className='status-pill '+oC;oS.textContent=oL;const aR=document.getElementById('avant-renewal');aR.textContent=fmtDate(d.avant.nextRenewal);aR.className='meta-value '+expiryClass(d.avant.nextRenewal);document.getElementById('avant-align-count').textContent=d.avant.align.available;document.getElementById('avant-align-bar').style.width=Math.round(d.avant.align.available/d.avant.align.perCycle*100)+'%';document.getElementById('avant-haven-count').textContent=d.avant.haven.available;document.getElementById('avant-haven-bar').style.width=Math.round(d.avant.haven.available/d.avant.haven.perCycle*100)+'%';const[rC,rL]=statusPill(d.rumble.credits,d.rumble.total);document.getElementById('rumble-credits').textContent=d.rumble.credits;document.getElementById('rumble-of').textContent='of '+d.rumble.total;document.getElementById('rumble-bar').style.width=Math.round(d.rumble.credits/d.rumble.total*100)+'%';const rE=document.getElementById('rumble-expiry');rE.textContent=fmtDate(d.rumble.expiry);rE.className='meta-value '+expiryClass(d.rumble.expiry);const rS=document.getElementById('rumble-status');rS.className='status-pill '+rC;rS.textContent=rL;}
+  if(sessionStorage.getItem('fc_auth')==='1'){showDashboard();}
+</script>
+</body>
+</html>
