@@ -111,6 +111,55 @@
     .class-dot { width: 6px; height: 6px; border-radius: 50%; }
     .footer { margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border); text-align: center; font-size: 11px; color: var(--muted); }
     @media (min-width: 400px) { #dashboard { padding: 20px; } }
+  
+    /* ââ Tab navigation âââââââââââââââââââââââââââââââ */
+    .tab-nav { display:flex; gap:0; margin-bottom:18px; border-bottom:1px solid var(--border); }
+    .tab-btn { flex:1; background:none; border:none; border-bottom:2px solid transparent;
+      color:var(--muted); padding:10px 0; cursor:pointer; font-size:12px; font-weight:700;
+      letter-spacing:1px; text-transform:uppercase; margin-bottom:-1px;
+      transition:color .15s,border-color .15s; }
+    .tab-btn.active { color:var(--text); border-bottom-color:var(--avant); }
+    .tab-content { display:none; }
+    .tab-content.active { display:block; }
+
+    /* ââ Today tab âââââââââââââââââââââââââââââââââââââ */
+    .today-date { font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase;
+      color:var(--muted); margin-bottom:14px; padding-top:2px; }
+    .today-section-lbl { font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase;
+      color:var(--muted); margin-bottom:8px; }
+    .cls-item { display:flex; align-items:center; gap:10px; padding:10px 0;
+      border-bottom:1px solid var(--border); }
+    .cls-item:last-child { border-bottom:none; }
+    .cls-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+    .cls-time { font-size:13px; font-weight:700; min-width:72px; }
+    .cls-name { font-size:13px; }
+    .cls-studio { font-size:10px; font-weight:700; letter-spacing:.8px; text-transform:uppercase;
+      color:var(--muted); margin-top:1px; }
+    .rest-msg { text-align:center; padding:18px 0; color:var(--muted); font-size:13px; }
+    .if-bar { font-size:11px; color:var(--muted); background:var(--surface2); border-radius:6px;
+      padding:6px 10px; margin-bottom:12px; }
+    .meal-row { display:flex; gap:12px; padding:9px 0; border-bottom:1px solid var(--border); }
+    .meal-row:last-child { border-bottom:none; }
+    .meal-time { font-size:11px; font-weight:700; color:var(--muted); min-width:68px; padding-top:2px; }
+    .meal-body { flex:1; }
+    .meal-title { font-size:13px; font-weight:600; }
+    .meal-sub { font-size:11px; color:var(--muted); margin-top:2px; line-height:1.4; }
+    .hc-tag { display:inline-block; font-size:9px; font-weight:700; letter-spacing:.3px;
+      background:rgba(139,111,212,.15); color:var(--avant); border-radius:3px;
+      padding:2px 5px; margin-top:3px; }
+    .rec-row { display:flex; justify-content:space-between; align-items:flex-start;
+      padding:9px 0; border-bottom:1px solid var(--border); }
+    .rec-row:last-child { border-bottom:none; }
+    .rec-label { font-size:13px; font-weight:600; }
+    .rec-sub { font-size:11px; color:var(--muted); margin-top:2px; }
+    .rec-cta { font-size:11px; font-weight:700; color:var(--avant); white-space:nowrap;
+      padding-left:8px; padding-top:2px; }
+    .haven-banner { display:flex; justify-content:space-between; align-items:center;
+      background:rgba(139,111,212,.1); border:1px solid rgba(139,111,212,.25);
+      border-radius:10px; padding:10px 14px; margin-top:10px; }
+    .haven-banner-lhs .haven-banner-title { font-size:13px; font-weight:700; }
+    .haven-banner-lhs .haven-banner-sub { font-size:11px; color:var(--muted); margin-top:2px; }
+    .haven-banner-num { font-size:30px; font-weight:800; color:var(--avant); letter-spacing:-1px; }
   </style>
 </head>
 <body>
@@ -119,7 +168,7 @@
   <div class="login-sub">Lucien's workout tracker</div>
   <div class="login-box">
     <label class="login-label" for="pass-input">Passcode</label>
-    <input class="login-input" id="pass-input" type="password" placeholder="••••••••" autocomplete="current-password" autofocus />
+    <input class="login-input" id="pass-input" type="password" placeholder="â¢â¢â¢â¢â¢â¢â¢â¢" autocomplete="current-password" autofocus />
     <button class="login-btn" onclick="doLogin()">Unlock</button>
     <div class="login-error" id="login-error"></div>
   </div>
@@ -136,8 +185,31 @@
       <div class="header-title">Fitness <span>Credits</span></div>
       <div class="last-updated" id="lastUpdated">Updated just now</div>
     </div>
-    <button class="lock-btn" onclick="doLock()">🔒 Lock</button>
+    <button class="lock-btn" onclick="doLock()">ð Lock</button>
   </div>
+  <div class="tab-nav">
+    <button class="tab-btn active" id="tab-btn-today" onclick="switchTab('today')">Today</button>
+    <button class="tab-btn" id="tab-btn-credits" onclick="switchTab('credits')">Credits</button>
+  </div>
+  <div id="tab-today" class="tab-content active">
+    <div class="today-date" id="today-date"></div>
+    <div class="cards">
+      <div class="card" style="background:var(--surface);border:1px solid var(--border)">
+        <div class="card-top"><div class="studio-name">Today's Classes</div></div>
+        <div id="today-schedule"></div>
+      </div>
+      <div class="card" style="background:var(--surface);border:1px solid var(--border)">
+        <div class="card-top"><div class="studio-name">Meal Plan</div></div>
+        <div class="if-bar" id="today-if-bar">Loadingâ¦</div>
+        <div id="today-meals"></div>
+      </div>
+      <div class="card" style="background:var(--surface);border:1px solid var(--border)">
+        <div class="card-top"><div class="studio-name">Recovery</div></div>
+        <div id="today-recovery"></div>
+      </div>
+    </div>
+  </div>
+  <div id="tab-credits" class="tab-content">
   <div class="cards">
     <div class="card barrys">
       <div class="card-top"><div class="studio-name">Barry's</div><div class="status-pill" id="barrys-status">Active</div></div>
@@ -145,7 +217,7 @@
       <div class="progress-wrap"><div class="progress-bar" id="barrys-bar" style="width:65%"></div></div>
       <div class="meta-row">
         <div class="meta-item"><div class="meta-label">Expires</div><div class="meta-value" id="barrys-expiry">Dec 10, 2026</div></div>
-        <div class="meta-item" style="text-align:right"><div class="meta-label">Package</div><div class="meta-value" style="font-size:11px;color:var(--muted)">20 Classes · Holiday Sale</div></div>
+        <div class="meta-item" style="text-align:right"><div class="meta-label">Package</div><div class="meta-value" style="font-size:11px;color:var(--muted)">20 Classes Â· Holiday Sale</div></div>
       </div>
       <div class="upcoming-classes"><div class="class-pill"><div class="class-dot" style="background:var(--barrys)"></div>Sat 10:10am booked</div></div>
     </div>
@@ -157,14 +229,14 @@
         <div class="meta-item"><div class="meta-label">Expires</div><div class="meta-value" id="othership-expiry">May 27, 2026</div></div>
         <div class="meta-item" style="text-align:right"><div class="meta-label">Package</div><div class="meta-value" style="font-size:11px;color:var(--muted)">Toronto 10 Pack</div></div>
       </div>
-      <div class="upcoming-classes"><div class="class-pill"><div class="class-dot" style="background:var(--othership)"></div>Fri Mar 20 · 7:45pm Sauna</div></div>
+      <div class="upcoming-classes"><div class="class-pill"><div class="class-dot" style="background:var(--othership)"></div>Fri Mar 20 Â· 7:45pm Sauna</div></div>
       <div class="card-divider"></div>
-      <div class="frozen-notice"><span>❄️</span><div>4x Monthly Membership frozen · unfreezes <strong>May 13, 2026</strong></div></div>
+      <div class="frozen-notice"><span>âï¸</span><div>4x Monthly Membership frozen Â· unfreezes <strong>May 13, 2026</strong></div></div>
     </div>
     <div class="card avant">
       <div class="card-top"><div class="studio-name">Avant</div><div class="status-pill status-active">Active</div></div>
       <div class="membership-badge">GARDE</div>
-      <div class="membership-sub">AVT Yorkville · Biweekly Membership</div>
+      <div class="membership-sub">AVT Yorkville Â· Biweekly Membership</div>
       <div class="renewal-row">
         <div class="meta-item"><div class="meta-label">Next Renewal</div><div class="meta-value" id="avant-renewal">Mar 20, 2026</div></div>
         <div class="meta-item" style="text-align:right"><div class="meta-label">Amount</div><div class="meta-value">$197.75</div></div>
@@ -189,24 +261,178 @@
       </div>
     </div>
   </div>
-  <div class="footer">Auto-refreshed daily · Barry's · Othership · Avant · Rumble</div>
+  </div><!-- /tab-credits -->
+  <div class="footer">Auto-refreshed daily Â· Barry's Â· Othership Â· Avant Â· Rumble</div>
 </div>
 <script>
   const DATA = {
     lastUpdated: "2026-03-19T12:00:00",
-    barrys: { credits: 13, total: 20, expiry: "2026-12-10" },
-    othership: { credits: 6, total: 10, expiry: "2026-05-27" },
+    barrys: { credits: 13, total: 20, expiry: "2026-12-10", classes: [{ day:"Sat", time:"10:10am", label:"Booked class", intensity:"high" }] },
+    othership: { credits: 6, total: 10, expiry: "2026-05-27", classes: [{ date:"2026-03-20", time:"7:45pm", label:"Sauna", intensity:"recovery" }] },
     avant: {
       nextRenewal: "2026-03-20", amount: 197.75,
       align: { available: 4, perCycle: 4 },
-      haven: { available: 2, perCycle: 2 }
+      haven: { available: 2, perCycle: 2 },
+      classes: [{ day:"Sat", time:"12:50pm", label:"Vinyasa", intensity:"moderate" }, { day:"Mon", time:"6:30pm", label:"LF3 Heavy", intensity:"high" }, { day:"Tue", time:"6pm", label:"Precision L3", intensity:"high" }]
     },
-    rumble: { credits: 9, total: 10, expiry: "2027-03-11" }
+    rumble: { credits: 9, total: 10, expiry: "2027-03-11", classes: [] },
+    profile: {
+      ifWindow: { start: 12, end: 20 }  // 16:8 â noon to 8 PM; adjust start/end as needed
+    },
+    hiChef: {
+      // Add current Hi Chef meals here:
+      // { name: "Meal Name", type: "lunch" or "dinner", servings: 2, expires: "YYYY-MM-DD" }
+      meals: []
+    }
   };
   const PASS_HASH = "8cf9cb7e91de81cd2034caed244460f97334ef154ce07f59e3dda766c38cb6e9";
   async function sha256(str) {
     const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
     return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  /* ââ Tab switching âââââââââââââââââââââââââââââââââââ */
+  function switchTab(tab) {
+    ['today','credits'].forEach(function(t) {
+      document.getElementById('tab-btn-'+t).classList.toggle('active', t===tab);
+      document.getElementById('tab-'+t).classList.toggle('active', t===tab);
+    });
+  }
+
+  /* ââ Today tab helpers âââââââââââââââââââââââââââââââ */
+  function parseClassMin(t) {
+    var m=t.match(/(\d+):?(\d{0,2})\s*(am|pm)/i);
+    if(!m) return -1;
+    var h=parseInt(m[1]),mn=parseInt(m[2])||0,ap=m[3].toLowerCase();
+    if(ap==='pm'&&h!==12) h+=12; if(ap==='am'&&h===12) h=0;
+    return h*60+mn;
+  }
+  function fmt12(h,m) {
+    var ap=h<12?'AM':'PM', h12=h%12||12;
+    return h12+':'+(m?String(m).padStart(2,'0'):'00')+'\u202f'+ap;
+  }
+  function getTodayClasses() {
+    var now=new Date();
+    var todayStr=now.toISOString().slice(0,10);
+    var days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    var todayDay=days[now.getDay()];
+    var studios=[
+      {key:'barrys',  name:"Barry's",  color:'var(--barrys)'},
+      {key:'othership',name:'Othership',color:'var(--othership)'},
+      {key:'avant',   name:'Avant',    color:'var(--avant)'},
+      {key:'rumble',  name:'Rumble',   color:'var(--rumble)'}
+    ];
+    var result=[];
+    studios.forEach(function(s) {
+      (DATA[s.key].classes||[]).forEach(function(c) {
+        var today=c.date?c.date===todayStr:c.day===todayDay;
+        if(today) result.push(Object.assign({},c,{studio:s.name,color:s.color,min:parseClassMin(c.time)}));
+      });
+    });
+    return result.sort(function(a,b){return a.min-b.min;});
+  }
+  function getMealPlan(classes) {
+    var ifw=DATA.profile.ifWindow, start=ifw.start, end=ifw.end;
+    var meals=DATA.hiChef.meals||[];
+    var isHigh=classes.some(function(c){return /heavy|lf3|boxing|precision/i.test(c.label);});
+    var isRec=classes.some(function(c){return /sauna|yoga|vinyasa/i.test(c.label);});
+    var eveningCls=classes.filter(function(c){return c.min>=17*60;}).sort(function(a,b){return a.min-b.min;})[0];
+    var slots=[];
+    var lunchMeal=meals.find(function(m){return m.type==='lunch';});
+    var dinnerMeal=meals.find(function(m){return m.type==='dinner';});
+    // Break fast
+    slots.push({
+      time:fmt12(start,0), title:'Break fast',
+      sub: isHigh?'Protein-forward \u2014 eggs, Greek yogurt, cottage cheese' :
+           isRec ?'Light meal \u2014 smoothie, fruit, or oats' :
+                  'Balanced meal to open your eating window',
+      hc: lunchMeal?lunchMeal.name:null
+    });
+    // Pre-workout fuel (if high-intensity evening class)
+    if(eveningCls&&isHigh) {
+      var preMin=eveningCls.min-120;
+      if(preMin>start*60) {
+        slots.push({time:fmt12(Math.floor(preMin/60),preMin%60),title:'Pre-workout fuel ('+eveningCls.label+')',
+          sub:'Complex carbs + light protein \u2014 rice cake, banana, chicken wrap',hc:null});
+      }
+    }
+    // Dinner / post-workout
+    var dinnerH=eveningCls?Math.min(Math.floor((eveningCls.min+60)/60),end-1):end-2;
+    slots.push({
+      time:fmt12(dinnerH,0),
+      title:isHigh?'Post-workout dinner':'Dinner',
+      sub:isHigh?'High protein \u2014 aim 40\u201350g for muscle recovery. Lean meat, legumes, rice' :
+                 'Balanced dinner \u2014 protein, veg, complex carbs',
+      hc: dinnerMeal?dinnerMeal.name:null
+    });
+    // Close window snack if room
+    if(dinnerH<end-1) {
+      slots.push({time:fmt12(end-1,0),title:'Close eating window',
+        sub:'Optional \u2014 nuts, Greek yogurt, or piece of dark chocolate',hc:null});
+    }
+    return {slots:slots, windowStr:fmt12(start,0)+' \u2013 '+fmt12(end,0)};
+  }
+  function getRecoveryItems(classes) {
+    var haven=DATA.avant.haven.available;
+    var isHigh=classes.some(function(c){return /heavy|lf3|boxing|precision/i.test(c.label);});
+    var hasSauna=classes.some(function(c){return /sauna/i.test(c.label);});
+    var isRest=classes.length===0;
+    var items=[];
+    if(hasSauna) items.push({label:'Sauna booked \u2713',sub:'Excellent passive recovery \u2014 stay well hydrated',cta:false});
+    if(isHigh&&haven>0) items.push({label:'Core Recovery recommended',sub:'Book a Haven session after your heavy class today',cta:true});
+    else if(isRest&&haven>0) items.push({label:'Rest day \u2014 ideal for Core Recovery',sub:'Perfect day for a Haven session at Avant',cta:true});
+    else if(haven>0) items.push({label:haven+' Haven credit'+(haven>1?'s':'')+' available',sub:'Reserve for post-heavy-class or rest days',cta:false});
+    else items.push({label:'No Haven credits remaining',sub:'Credits reset at next billing cycle',cta:false});
+    if(classes.length>0&&!hasSauna) items.push({label:'Post-workout mobility',sub:'10\u201315 min foam roll + stretch reduces DOMS',cta:false});
+    return {items:items,haven:haven};
+  }
+  function renderToday() {
+    var now=new Date();
+    var dayNames=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    var monNames=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    document.getElementById('today-date').textContent=
+      dayNames[now.getDay()]+', '+monNames[now.getMonth()]+' '+now.getDate();
+    var classes=getTodayClasses();
+    // Schedule
+    var sched=document.getElementById('today-schedule');
+    if(classes.length===0) {
+      sched.innerHTML='<div class="rest-msg">\uD83E\uDDD8 No classes today \u2014 rest day</div>';
+    } else {
+      sched.innerHTML=classes.map(function(c){
+        return '<div class="cls-item"><div class="cls-dot" style="background:'+c.color+'"></div>'+
+          '<div class="cls-time">'+c.time+'</div>'+
+          '<div><div class="cls-name">'+c.label+'</div>'+
+          '<div class="cls-studio">'+c.studio+'</div></div></div>';
+      }).join('');
+    }
+    // Meals
+    var plan=getMealPlan(classes);
+    document.getElementById('today-if-bar').textContent=
+      '\uD83D\uDD5B Eating window: '+plan.windowStr+' \u00B7 16:8 IF';
+    document.getElementById('today-meals').innerHTML=plan.slots.map(function(s){
+      return '<div class="meal-row"><div class="meal-time">'+s.time+'</div>'+
+        '<div class="meal-body"><div class="meal-title">'+s.title+'</div>'+
+        '<div class="meal-sub">'+s.sub+'</div>'+
+        (s.hc?'<div class="hc-tag">\uD83C\uDF7D Hi Chef: '+s.hc+'</div>':'')+
+        '</div></div>';
+    }).join('');
+    // Recovery
+    var rec=getRecoveryItems(classes);
+    var recEl=document.getElementById('today-recovery');
+    recEl.innerHTML=rec.items.map(function(item){
+      return '<div class="rec-row"><div>'+
+        '<div class="rec-label">'+item.label+'</div>'+
+        '<div class="rec-sub">'+item.sub+'</div>'+
+        '</div>'+(item.cta?'<div class="rec-cta">Book \u2192</div>':'')+
+        '</div>';
+    }).join('');
+    if(rec.haven>0) {
+      recEl.innerHTML+='<div class="haven-banner">'+
+        '<div class="haven-banner-lhs">'+
+        '<div class="haven-banner-title">Core Recovery \u00B7 Avant Haven</div>'+
+        '<div class="haven-banner-sub">avantcollective.com \u2192 Book a session</div>'+
+        '</div><div class="haven-banner-num">'+rec.haven+'</div></div>';
+    }
   }
   async function doLogin() {
     const input = document.getElementById('pass-input').value;
@@ -229,6 +455,7 @@
   function showDashboard() {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('dashboard').classList.add('visible');
+    renderToday();
     render();
   }
   document.getElementById('pass-input').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
@@ -238,7 +465,7 @@
     return Math.ceil((new Date(dateStr) - today) / 86400000);
   }
   function fmtDate(dateStr) {
-    if (!dateStr) return '—';
+    if (!dateStr) return 'â';
     return new Date(dateStr).toLocaleDateString('en-CA', { month:'short', day:'numeric', year:'numeric' });
   }
   function expiryClass(dateStr) {
