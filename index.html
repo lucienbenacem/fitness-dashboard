@@ -160,6 +160,42 @@
     .haven-banner-lhs .haven-banner-title { font-size:13px; font-weight:700; }
     .haven-banner-lhs .haven-banner-sub { font-size:11px; color:var(--muted); margin-top:2px; }
     .haven-banner-num { font-size:30px; font-weight:800; color:var(--avant); letter-spacing:-1px; }
+    /* ── Day Brief ─────────────────────────────────────────────── */
+    .brief-score { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+    .brief-ring { width:52px; height:52px; border-radius:50%; display:flex; align-items:center;
+      justify-content:center; font-size:15px; font-weight:800; flex-shrink:0; letter-spacing:-1px;
+      border:2.5px solid; }
+    .brief-ring.high     { background:rgba(76,175,125,.12); color:var(--green);  border-color:var(--green);  }
+    .brief-ring.moderate { background:rgba(245,200,66,.12); color:var(--yellow); border-color:var(--yellow); }
+    .brief-ring.low      { background:rgba(232,52,42,.12);  color:var(--red);    border-color:var(--red);    }
+    .brief-headline { font-size:14px; font-weight:700; margin-bottom:3px; }
+    .brief-sub { font-size:12px; color:var(--muted); line-height:1.45; }
+    .brief-metrics { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin:12px 0; }
+    .brief-metric { background:var(--surface2); border-radius:8px; padding:8px 10px; }
+    .brief-metric-val { font-size:20px; font-weight:800; letter-spacing:-0.5px; line-height:1; }
+    .brief-metric-lbl { font-size:9px; font-weight:700; letter-spacing:.8px; text-transform:uppercase;
+      color:var(--muted); margin-top:3px; }
+    .brief-metric.ok   .brief-metric-val { color:var(--green);  }
+    .brief-metric.warn .brief-metric-val { color:var(--yellow); }
+    .brief-metric.bad  .brief-metric-val { color:var(--red);    }
+    .brief-section-lbl { font-size:9px; font-weight:700; letter-spacing:1px; text-transform:uppercase;
+      color:var(--muted); margin-bottom:6px; }
+    .brief-focus { background:rgba(139,111,212,.08); border:1px solid rgba(139,111,212,.2);
+      border-radius:8px; padding:10px 12px; margin-bottom:10px; }
+    .brief-focus-text { font-size:12px; line-height:1.6; }
+    .goal-bar-row { display:flex; align-items:center; gap:8px; padding:5px 0;
+      border-bottom:1px solid var(--border); }
+    .goal-bar-row:last-child { border-bottom:none; }
+    .goal-bar-lbl   { font-size:11px; color:var(--muted); width:116px; flex-shrink:0; }
+    .goal-bar-track { flex:1; background:var(--surface2); border-radius:3px; height:4px; overflow:hidden; }
+    .goal-bar-fill  { height:100%; border-radius:3px; background:var(--avant); transition:width .5s ease; }
+    .goal-bar-fill.ok   { background:var(--green);  }
+    .goal-bar-fill.warn { background:var(--yellow); }
+    .goal-bar-fill.bad  { background:var(--red);    }
+    .goal-bar-val { font-size:11px; font-weight:700; width:38px; text-align:right; flex-shrink:0; }
+    .hc-week-tag { display:inline-block; font-size:9px; font-weight:700; letter-spacing:.3px;
+      background:rgba(139,111,212,.15); color:var(--avant); border-radius:3px; padding:2px 5px;
+      margin:2px 2px 0 0; }
   </style>
 </head>
 <body>
@@ -194,6 +230,10 @@
   <div id="tab-today" class="tab-content active">
     <div class="today-date" id="today-date"></div>
     <div class="cards">
+      <div class="card" style="background:var(--surface);border:1px solid var(--border)">
+        <div class="card-top"><div class="studio-name">Day Brief</div></div>
+        <div id="today-brief"></div>
+      </div>
       <div class="card" style="background:var(--surface);border:1px solid var(--border)">
         <div class="card-top"><div class="studio-name">Today's Classes</div></div>
         <div id="today-schedule"></div>
@@ -283,6 +323,27 @@
       // Add current Hi Chef meals here:
       // { name: "Meal Name", type: "lunch" or "dinner", servings: 2, expires: "YYYY-MM-DD" }
       meals: []
+    },
+    health: {
+      // ── Sync from Apple Health each morning ─────────────────
+      sleep:       { hours: 7.5, deep: 1.2, rem: 1.9 },  // last night (hours)
+      hrv:         52,    // ms — morning HRV (Apple Health or Oura)
+      restingHR:   58,    // bpm
+      steps:       { yesterday: 9200, weekAvg: 7800 },
+      activeKcal:  480    // active calories burned yesterday
+    },
+    goals: {
+      weeklyWorkouts: 4,   // target sessions per week
+      dailySteps:    10000,
+      sleepHours:    8,
+      hrvBaseline:   55    // your personal baseline — update after 2–3 weeks of data
+    },
+    week: {
+      // ── Update daily ────────────────────────────────────────
+      workoutsCompleted: 0,   // sessions completed Mon–today
+      // Hi Chef meals eaten this week (log after eating):
+      // { name: "Meal Name", type: "lunch"|"dinner", day: "Mon" }
+      hiChefConsumed: []
     }
   };
   const PASS_HASH = "8cf9cb7e91de81cd2034caed244460f97334ef154ce07f59e3dda766c38cb6e9";
@@ -386,6 +447,105 @@
     if(classes.length>0&&!hasSauna) items.push({label:'Post-workout mobility',sub:'10\u201315 min foam roll + stretch reduces DOMS',cta:false});
     return {items:items,haven:haven};
   }
+  function renderDaySummary(classes) {
+    var h = DATA.health;
+    var g = DATA.goals;
+    var w = DATA.week;
+
+    // ── Readiness score (0–100) ───────────────────────────────
+    var hrvPct   = h.hrv  ? Math.round(h.hrv / g.hrvBaseline * 100) : 80;
+    var sleepPct = h.sleep.hours ? Math.round(h.sleep.hours / g.sleepHours * 100) : 80;
+    var score    = Math.min(100, Math.round((Math.min(hrvPct,120) + Math.min(sleepPct,120)) / 2));
+
+    var tier, tierColor, approach;
+    var hasHeavy = classes.some(function(c){ return /heavy|lf3|boxing|precision/i.test(c.label); });
+    var hasMod   = classes.some(function(c){ return /vinyasa|yoga|align/i.test(c.label); });
+    var isRest   = classes.length === 0;
+
+    if (score >= 88) {
+      tier = 'High Readiness'; tierColor = 'high';
+      approach = hasHeavy ? 'Prime day — push intensity in your session. HRV and sleep are both strong.'
+               : isRest   ? 'Great recovery numbers. Consider adding a walk or bonus mobility work.'
+               :            'Strong baseline. Moderate session + good nutrition will compound well today.';
+    } else if (score >= 68) {
+      tier = 'Moderate Readiness'; tierColor = 'moderate';
+      approach = hasHeavy ? 'Solid baseline. Hit the session but listen to your body on heavy sets — scale if needed.'
+               : isRest   ? 'Decent recovery. A light walk and extra hydration will help rebuild for tomorrow.'
+               :            'Good day for moderate effort. Focus on technique and consistency over output.';
+    } else {
+      tier = 'Low Readiness'; tierColor = 'low';
+      approach = hasHeavy ? 'HRV or sleep is flagged. Consider scaling weights significantly or swapping for active recovery.'
+               :            'Active recovery day. Light movement only — prioritise sleep, hydration, and stress reduction tonight.';
+    }
+
+    // ── Metric status ──────────────────────────────────────────
+    var sleepSt = h.sleep.hours >= g.sleepHours       ? 'ok' : h.sleep.hours >= g.sleepHours * 0.875  ? 'warn' : 'bad';
+    var hrvSt   = h.hrv         >= g.hrvBaseline      ? 'ok' : h.hrv         >= g.hrvBaseline  * 0.80  ? 'warn' : 'bad';
+    var stepsSt = h.steps.yesterday >= g.dailySteps   ? 'ok' : h.steps.yesterday >= g.dailySteps * 0.75 ? 'warn' : 'bad';
+    var stepsDisp = h.steps.yesterday >= 1000 ? (h.steps.yesterday/1000).toFixed(1)+'k' : String(h.steps.yesterday);
+
+    // ── Focus items ──────────────────────────────────────────────
+    var focus = [];
+    if (h.sleep.hours < g.sleepHours * 0.875)
+      focus.push('Sleep: got ' + h.sleep.hours + 'h — aim for ' + g.sleepHours + 'h tonight');
+    if (h.hrv < g.hrvBaseline * 0.80)
+      focus.push('HRV below baseline (' + h.hrv + ' vs ' + g.hrvBaseline + ') — prioritise recovery');
+    if (h.steps.yesterday < g.dailySteps * 0.75)
+      focus.push('Steps: ' + stepsDisp + ' yesterday — aim for ' + (g.dailySteps/1000).toFixed(0) + 'k today');
+    var dayOfWeek = new Date().getDay();
+    var daysLeft  = 7 - dayOfWeek;
+    var wktsNeeded = g.weeklyWorkouts - w.workoutsCompleted;
+    if (wktsNeeded > daysLeft)
+      focus.push('Workouts: need ' + wktsNeeded + ' more sessions but only ' + daysLeft + ' days left this week');
+    if (focus.length === 0)
+      focus.push('All metrics on track — stay consistent ✓');
+
+    // ── Hi Chef this week ──────────────────────────────────────────
+    var consumed = w.hiChefConsumed || [];
+
+    // ── Goal bars ──────────────────────────────────────────────────
+    var wktPct   = Math.min(100, Math.round(w.workoutsCompleted / g.weeklyWorkouts * 100));
+    var slpPct   = Math.min(100, Math.round(h.sleep.hours / g.sleepHours * 100));
+    var stpPct   = Math.min(100, Math.round(h.steps.yesterday / g.dailySteps * 100));
+    function barClass(pct) { return pct >= 100 ? 'ok' : pct >= 65 ? 'warn' : 'bad'; }
+    function barColor(pct) { return pct >= 100 ? 'green' : pct >= 65 ? 'yellow' : 'red'; }
+
+    function goalBar(label, pct, valStr) {
+      return '<div class="goal-bar-row">' +
+        '<div class="goal-bar-lbl">' + label + '</div>' +
+        '<div class="goal-bar-track"><div class="goal-bar-fill ' + barClass(pct) + '" style="width:' + pct + '%"></div></div>' +
+        '<div class="goal-bar-val" style="color:var(--' + barColor(pct) + ')">' + valStr + '</div>' +
+        '</div>';
+    }
+
+    var hcHtml = consumed.length > 0
+      ? '<div style="margin-top:10px;"><div class="brief-section-lbl">Hi Chef this week</div><div>' +
+        consumed.map(function(m){ return '<span class="hc-week-tag">' + m.day + ': ' + m.name + '</span>'; }).join('') +
+        '</div></div>'
+      : '';
+
+    document.getElementById('today-brief').innerHTML =
+      '<div class="brief-score">' +
+        '<div class="brief-ring ' + tierColor + '">' + score + '</div>' +
+        '<div><div class="brief-headline">' + tier + '</div>' +
+        '<div class="brief-sub">' + approach + '</div></div>' +
+      '</div>' +
+      '<div class="brief-metrics">' +
+        '<div class="brief-metric ' + sleepSt + '"><div class="brief-metric-val">' + h.sleep.hours + 'h</div><div class="brief-metric-lbl">Sleep</div></div>' +
+        '<div class="brief-metric ' + hrvSt   + '"><div class="brief-metric-val">' + (h.hrv || '—') + '</div><div class="brief-metric-lbl">HRV</div></div>' +
+        '<div class="brief-metric ' + stepsSt + '"><div class="brief-metric-val">' + stepsDisp + '</div><div class="brief-metric-lbl">Steps yest.</div></div>' +
+      '</div>' +
+      '<div class="brief-focus"><div class="brief-section-lbl">Focus today</div>' +
+        '<div class="brief-focus-text">' + focus.join('<br>') + '</div>' +
+      '</div>' +
+      '<div class="brief-section-lbl">Goals this week</div>' +
+      '<div>' +
+        goalBar('Workouts', wktPct, w.workoutsCompleted + '/' + g.weeklyWorkouts) +
+        goalBar('Sleep last night', slpPct, h.sleep.hours + 'h') +
+        goalBar('Steps yesterday', stpPct, stepsDisp) +
+      '</div>' +
+      hcHtml;
+  }
   function renderToday() {
     var now=new Date();
     var dayNames=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -393,6 +553,7 @@
     document.getElementById('today-date').textContent=
       dayNames[now.getDay()]+', '+monNames[now.getMonth()]+' '+now.getDate();
     var classes=getTodayClasses();
+    renderDaySummary(classes);
     // Schedule
     var sched=document.getElementById('today-schedule');
     if(classes.length===0) {
@@ -427,11 +588,11 @@
         '</div>';
     }).join('');
     if(rec.haven>0) {
-      recEl.innerHTML+='<div class="haven-banner">'+
+      recEl.innerHTML+='<a href="https://myavant.club" target="_blank" style="text-decoration:none;display:block;"><div class="haven-banner">'+
         '<div class="haven-banner-lhs">'+
         '<div class="haven-banner-title">Core Recovery \u00B7 Avant Haven</div>'+
-        '<div class="haven-banner-sub">avantcollective.com \u2192 Book a session</div>'+
-        '</div><div class="haven-banner-num">'+rec.haven+'</div></div>';
+        '<div class="haven-banner-sub">Tap to book at myavant.club \u2192</div>'+
+        '</div><div class="haven-banner-num">'+rec.haven+'</div></div></a>';
     }
   }
   async function doLogin() {
