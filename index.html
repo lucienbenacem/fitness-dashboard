@@ -171,7 +171,7 @@
       </div>
       <div class="perk-grid">
         <div class="perk-card"><div class="perk-name">Align</div><div class="perk-count" id="avant-align-count">4</div><div class="perk-cycle">of 4 per cycle</div><div class="perk-bar-wrap"><div class="perk-bar" id="avant-align-bar" style="width:100%"></div></div></div>
-        <div class="perk-card"><div class="perk-name">Haven</div><div class="perk-count" id="avant-haven-count">1</div><div class="perk-cycle">of 2 per cycle</div><div class="perk-bar-wrap"><div class="perk-bar" id="avant-haven-bar" style="width:50%"></div></div></div>
+        <div class="perk-card"><div class="perk-name">Haven</div><div class="perk-count" id="avant-haven-count">2</div><div class="perk-cycle">of 2 per cycle</div><div class="perk-bar-wrap"><div class="perk-bar" id="avant-haven-bar" style="width:100%"></div></div></div>
       </div>
       <div class="upcoming-classes" style="margin-top:10px">
         <div class="class-pill"><div class="class-dot" style="background:var(--avant)"></div>Sat 12:50pm Vinyasa</div>
@@ -199,7 +199,7 @@
     avant: {
       nextRenewal: "2026-03-20", amount: 197.75,
       align: { available: 4, perCycle: 4 },
-      haven: { available: 1, perCycle: 2 }
+      haven: { available: 2, perCycle: 2 }
     },
     rumble: { credits: 9, total: 10, expiry: "2027-03-11" }
   };
@@ -254,6 +254,39 @@
     if (pct <= 0.4) return ['status-warning', 'Running Low'];
     return ['status-active', 'Active'];
   }
+  function hidePastClasses() {
+    const now = new Date();
+    const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    document.querySelectorAll('.class-pill').forEach(function(pill) {
+      const text = pill.textContent.trim();
+      let dt = null;
+      const fullMatch = text.match(/(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d{1,2})\s*[\xb7\-]\s*(\d{1,2}):?(\d{0,2})\s*(am|pm)/i);
+      if (fullMatch) {
+        const mon = fullMatch[1], day = parseInt(fullMatch[2]);
+        let h = parseInt(fullMatch[3]), m = parseInt(fullMatch[4]) || 0;
+        const ap = fullMatch[5].toLowerCase();
+        const mi = monthNames.findIndex(function(x){return x.toLowerCase()===mon.toLowerCase();});
+        if (mi >= 0) {
+          if (ap==='pm' && h!==12) h+=12; else if (ap==='am' && h===12) h=0;
+          dt = new Date(now.getFullYear(), mi, day, h, m);
+          if (dt < now && (now-dt) > 180*24*3600000) dt.setFullYear(dt.getFullYear()+1);
+        }
+      }
+      if (!dt) {
+        const relMatch = text.match(/^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)\s+(\d{1,2}):?(\d{0,2})\s*(am|pm)/i);
+        if (relMatch) {
+          const td = dayNames.findIndex(function(d){return d.toLowerCase()===relMatch[1].toLowerCase();});
+          let h = parseInt(relMatch[2]), m = parseInt(relMatch[3]) || 0;
+          const ap = relMatch[4].toLowerCase();
+          if (ap==='pm' && h!==12) h+=12; else if (ap==='am' && h===12) h=0;
+          let diff = td - now.getDay(); if (diff < 0) diff += 7;
+          dt = new Date(now.getFullYear(), now.getMonth(), now.getDate()+diff, h, m);
+        }
+      }
+      if (dt && dt < now) pill.style.display = 'none';
+    });
+  }
   function render() {
     const d = DATA;
     const lu = new Date(d.lastUpdated);
@@ -283,6 +316,7 @@
     document.getElementById('rumble-bar').style.width = Math.round(d.rumble.credits / d.rumble.total * 100) + '%';
     const rExp = document.getElementById('rumble-expiry'); rExp.textContent = fmtDate(d.rumble.expiry); rExp.className = 'meta-value ' + expiryClass(d.rumble.expiry);
     const rStatus = document.getElementById('rumble-status'); rStatus.className = 'status-pill ' + rClass; rStatus.textContent = rLabel;
+    hidePastClasses();
   }
   if (sessionStorage.getItem('fc_auth') === '1') { showDashboard(); }
 </script>
