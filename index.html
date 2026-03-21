@@ -1,210 +1,160 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>Fitness Credits</title>
-  <style>
-    :root {
-      --bg: #0f0f0f;
-      --surface: #1a1a1a;
-      --surface2: #242424;
-      --border: #2e2e2e;
-      --text: #f0f0f0;
-      --muted: #888;
-      --barrys: #e8342a;
-      --othership: #c97c3a;
-      --avant: #8b6fd4;
-      --rumble: #d4284a
-      --green: #4caf7d;
-      --yellow: #f5c842;
-      --red: #e8342a;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      min-height: 100vh;
-    }
-
-    #login-screen {
-      position: fixed; inset: 0;
-      background: var(--bg);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      padding: 32px 24px;
-    }
-    .login-logo { font-size: 28px; font-weight: 800; letter-spacing: -1px; margin-bottom: 6px; }
-    .login-logo span { opacity: 0.4; font-weight: 400; }
-    .login-sub { font-size: 13px; color: var(--muted); margin-bottom: 40px; }
-    .login-box { width: 100%; max-width: 320px; }
-    .login-label { font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; display: block; }
-    .login-input { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; color: var(--text); font-size: 18px; padding: 14px 16px; letter-spacing: 3px; margin-bottom: 14px; outline: none; transition: border-color 0.2s; }
-    .login-input:focus { border-color: var(--avant); }
-    .login-input.shake { animation: shake 0.4s ease; border-color: var(--red); }
-    @keyframes shake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-8px); } 40% { transform: translateX(8px); } 60% { transform: translateX(-6px); } 80% { transform: translateX(6px); } }
-    .login-btn { width: 100%; background: var(--avant); border: none; border-radius: 12px; color: #fff; font-size: 15px; font-weight: 700; padding: 14px; cursor: pointer; letter-spacing: 0.3px; transition: opacity 0.2s; }
-    .login-btn:active { opacity: 0.7; }
-    .login-error { font-size: 12px; color: var(--red); text-align: center; margin-top: 10px; min-height: 18px; }
-    .login-dots { display: flex; gap: 8px; justify-content: center; margin-top: 32px; }
-    .login-dot { width: 6px; height: 6px; border-radius: 50%; opacity: 0.2; }
-    .login-dot.barrys { background: var(--barrys); }
-    .login-dot.othership { background: var(--othership); }
-    .login-dot.avant { background: var(--avant); }
-    .login-dot.rumble { background: var(--rumble); }
-
-    #dashboard { display: none; padding: 16px; max-width: 480px; margin: 0 auto; }
-    #dashboard.visible { display: block; }
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
-    .header-title { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
-    .header-title span { opacity: 0.5; font-weight: 400; }
-    .last-updated { font-size: 11px; color: var(--muted); text-align: right; }
-    .lock-btn { background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 8px; padding: 5px 10px; font-size: 12px; cursor: pointer; }
-    .cards { display: flex; flex-direction: column; gap: 12px; }
-    .card { background: var(--surface); border-radius: 16px; padding: 18px; border: 1px solid var(--border); position: relative; overflow: hidden; }
-    .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
-    .card.barrys::before { background: var(--barrys); }
-    .card.othership::before { background: var(--othership); }
-    .card.avant::before { background: var(--avant); }
-    .card.rumble::before { background: var(--rumble); }
-    .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
-    .studio-name { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.5; }
-    .status-pill { font-size: 10px; font-weight: 600; letter-spacing: 0.5px; padding: 3px 8px; border-radius: 20px; text-transform: uppercase; }
-    .status-active { background: #1a3326; color: var(--green); }
-    .status-warning { background: #2e2510; color: var(--yellow); }
-    .status-low { background: #2e1010; color: var(--red); }
-    .credit-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 10px; }
-    .credit-count { font-size: 48px; font-weight: 800; line-height: 1; letter-spacing: -2px; }
-    .credit-label { font-size: 14px; color: var(--muted); margin-bottom: 2px; }
-    .credit-of { font-size: 16px; color: var(--muted); font-weight: 400; }
-    .progress-wrap { background: var(--surface2); border-radius: 4px; height: 5px; margin-bottom: 10px; overflow: hidden; }
-    .progress-bar { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
-    .barrys .progress-bar { background: var(--barrys); }
-    .othership .progress-bar { background: var(--othership); }
-    .avant .progress-bar { background: var(--avant); }
-    .rumble .progress-bar { background: var(--rumble); }
-    .meta-row { display: flex; justify-content: space-between; align-items: center; }
-    .meta-item { display: flex; flex-direction: column; gap: 2px; }
-    .meta-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
-    .meta-value { font-size: 13px; font-weight: 600; }
-    .meta-value.urgent { color: var(--red); }
-    .meta-value.warn { color: var(--yellow); }
-    .meta-value.ok { color: var(--green); }
-    .card-divider { height: 1px; background: var(--border); margin: 12px 0; }
-    .frozen-notice { display: flex; align-items: center; gap: 8px; margin-top: 10px; background: rgba(111,160,224,0.08); border: 1px solid rgba(111,160,224,0.2); border-radius: 8px; padding: 8px 10px; font-size: 11px; color: #6fa0e0; }
-    .membership-badge { font-size: 28px; font-weight: 800; letter-spacing: -1px; margin-bottom: 4px; }
-    .membership-sub { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
-    .renewal-row { display: flex; justify-content: space-between; margin-bottom: 14px; }
-    .perk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
-    .perk-card { background: var(--surface2); border-radius: 10px; padding: 12px; border: 1px solid var(--border); }
-    .perk-name { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
-    .perk-count { font-size: 28px; font-weight: 800; letter-spacing: -1px; line-height: 1; }
-    .perk-cycle { font-size: 10px; color: var(--muted); margin-top: 2px; }
-    .perk-bar-wrap { background: var(--border); border-radius: 3px; height: 3px; margin-top: 8px; overflow: hidden; }
-    .perk-bar { height: 100%; border-radius: 3px; background: var(--avant); transition: width 0.5s ease; }
-    .upcoming-classes { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
-    .class-pill { background: var(--surface2); border-radius: 20px; padding: 4px 10px; font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 5px; }
-    .class-dot { width: 6px; height: 6px; border-radius: 50%; }
-    .footer { margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border); text-align: center; font-size: 11px; color: var(--muted); }
-    @media (min-width: 400px) { #dashboard { padding: 20px; } }
-  
-    /* ââ Tab navigation âââââââââââââââââââââââââââââââ */
-    .tab-nav { display:flex; gap:0; margin-bottom:18px; border-bottom:1px solid var(--border); }
-    .tab-btn { flex:1; background:none; border:none; border-bottom:2px solid transparent;
-      color:var(--muted); padding:10px 0; cursor:pointer; font-size:12px; font-weight:700;
-      letter-spacing:1px; text-transform:uppercase; margin-bottom:-1px;
-      transition:color .15s,border-color .15s; }
-    .tab-btn.active { color:var(--text); border-bottom-color:var(--avant); }
-    .tab-content { display:none; }
-    .tab-content.active { display:block; }
-
-    /* ââ Today tab âââââââââââââââââââââââââââââââââââââ */
-    .today-date { font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase;
-      color:var(--muted); margin-bottom:14px; padding-top:2px; }
-    .today-section-lbl { font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase;
-      color:var(--muted); margin-bottom:8px; }
-    .cls-item { display:flex; align-items:center; gap:10px; padding:10px 0;
-      border-bottom:1px solid var(--border); }
-    .cls-item:last-child { border-bottom:none; }
-    .cls-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
-    .cls-time { font-size:13px; font-weight:700; min-width:72px; }
-    .cls-name { font-size:13px; }
-    .cls-studio { font-size:10px; font-weight:700; letter-spacing:.8px; text-transform:uppercase;
-      color:var(--muted); margin-top:1px; }
-    .rest-msg { text-align:center; padding:18px 0; color:var(--muted); font-size:13px; }
-    .if-bar { font-size:11px; color:var(--muted); background:var(--surface2); border-radius:6px;
-      padding:6px 10px; margin-bottom:12px; }
-    .meal-row { display:flex; gap:12px; padding:9px 0; border-bottom:1px solid var(--border); }
-    .meal-row:last-child { border-bottom:none; }
-    .meal-time { font-size:11px; font-weight:700; color:var(--muted); min-width:68px; padding-top:2px; }
-    .meal-body { flex:1; }
-    .meal-title { font-size:13px; font-weight:600; }
-    .meal-sub { font-size:11px; color:var(--muted); margin-top:2px; line-height:1.4; }
-    .hc-tag { display:inline-block; font-size:9px; font-weight:700; letter-spacing:.3px;
-      background:rgba(139,111,212,.15); color:var(--avant); border-radius:3px;
-      padding:2px 5px; margin-top:3px; }
-    .rec-row { display:flex; justify-content:space-between; align-items:flex-start;
-      padding:9px 0; border-bottom:1px solid var(--border); }
-    .rec-row:last-child { border-bottom:none; }
-    .rec-label { font-size:13px; font-weight:600; }
-    .rec-sub { font-size:11px; color:var(--muted); margin-top:2px; }
-    .rec-cta { font-size:11px; font-weight:700; color:var(--avant); white-space:nowrap;
-      padding-left:8px; padding-top:2px; }
-    .haven-banner { display:flex; justify-content:space-between; align-items:center;
-      background:rgba(139,111,212,.1); border:1px solid rgba(139,111,212,.25);
-      border-radius:10px; padding:10px 14px; margin-top:10px; }
-    .haven-banner-lhs .haven-banner-title { font-size:13px; font-weight:700; }
-    .haven-banner-lhs .haven-banner-sub { font-size:11px; color:var(--muted); margin-top:2px; }
-    .haven-banner-num { font-size:30px; font-weight:800; color:var(--avant); letter-spacing:-1px; }
-    /* ── Day Brief ─────────────────────────────────────────────── */
-    .brief-score { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
-    .brief-ring { width:52px; height:52px; border-radius:50%; display:flex; align-items:center;
-      justify-content:center; font-size:15px; font-weight:800; flex-shrink:0; letter-spacing:-1px;
-      border:2.5px solid; }
-    .brief-ring.high     { background:rgba(76,175,125,.12); color:var(--green);  border-color:var(--green);  }
-    .brief-ring.moderate { background:rgba(245,200,66,.12); color:var(--yellow); border-color:var(--yellow); }
-    .brief-ring.low      { background:rgba(232,52,42,.12);  color:var(--red);    border-color:var(--red);    }
-    .brief-headline { font-size:14px; font-weight:700; margin-bottom:3px; }
-    .brief-sub { font-size:12px; color:var(--muted); line-height:1.45; }
-    .brief-metrics { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin:12px 0; }
-    .brief-metric { background:var(--surface2); border-radius:8px; padding:8px 10px; }
-    .brief-metric-val { font-size:20px; font-weight:800; letter-spacing:-0.5px; line-height:1; }
-    .brief-metric-lbl { font-size:9px; font-weight:700; letter-spacing:.8px; text-transform:uppercase;
-      color:var(--muted); margin-top:3px; }
-    .brief-metric.ok   .brief-metric-val { color:var(--green);  }
-    .brief-metric.warn .brief-metric-val { color:var(--yellow); }
-    .brief-metric.bad  .brief-metric-val { color:var(--red);    }
-    .brief-section-lbl { font-size:9px; font-weight:700; letter-spacing:1px; text-transform:uppercase;
-      color:var(--muted); margin-bottom:6px; }
-    .brief-focus { background:rgba(139,111,212,.08); border:1px solid rgba(139,111,212,.2);
-      border-radius:8px; padding:10px 12px; margin-bottom:10px; }
-    .brief-focus-text { font-size:12px; line-height:1.6; }
-    .goal-bar-row { display:flex; align-items:center; gap:8px; padding:5px 0;
-      border-bottom:1px solid var(--border); }
-    .goal-bar-row:last-child { border-bottom:none; }
-    .goal-bar-lbl   { font-size:11px; color:var(--muted); width:116px; flex-shrink:0; }
-    .goal-bar-track { flex:1; background:var(--surface2); border-radius:3px; height:4px; overflow:hidden; }
-    .goal-bar-fill  { height:100%; border-radius:3px; background:var(--avant); transition:width .5s ease; }
-    .goal-bar-fill.ok   { background:var(--green);  }
-    .goal-bar-fill.warn { background:var(--yellow); }
-    .goal-bar-fill.bad  { background:var(--red);    }
-    .goal-bar-val { font-size:11px; font-weight:700; width:38px; text-align:right; flex-shrink:0; }
-    .hc-week-tag { display:inline-block; font-size:9px; font-weight:700; letter-spacing:.3px;
-      background:rgba(139,111,212,.15); color:var(--avant); border-radius:3px; padding:2px 5px;
-      margin:2px 2px 0 0; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Fitness Assistant</title>
+<style>
+:root {
+  --bg: #0f0f0f; --surface: #1a1a1a; --surface2: #242424; --border: #2e2e2e;
+  --text: #f0f0f0; --muted: #888;
+  --barrys: #e8342a; --othership: #c97c3a; --avant: #8b6fd4; --rumble: #d4284a;
+  --green: #4caf7d; --yellow: #f5c842; --red: #e8342a;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
+#login-screen { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; padding: 32px 24px; }
+.login-logo { font-size: 28px; font-weight: 800; letter-spacing: -1px; margin-bottom: 6px; }
+.login-logo span { opacity: 0.4; font-weight: 400; }
+.login-sub { font-size: 13px; color: var(--muted); margin-bottom: 40px; }
+.login-box { width: 100%; max-width: 320px; }
+.login-label { font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; display: block; }
+.login-input { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; color: var(--text); font-size: 18px; padding: 14px 16px; letter-spacing: 3px; margin-bottom: 14px; outline: none; transition: border-color 0.2s; }
+.login-input:focus { border-color: var(--avant); }
+.login-input.shake { animation: shake 0.4s ease; border-color: var(--red); }
+@keyframes shake { 0%,100%{transform:translateX(0);} 20%{transform:translateX(-8px);} 40%{transform:translateX(8px);} 60%{transform:translateX(-6px);} 80%{transform:translateX(6px);} }
+.login-btn { width: 100%; background: var(--avant); border: none; border-radius: 12px; color: #fff; font-size: 15px; font-weight: 700; padding: 14px; cursor: pointer; letter-spacing: 0.3px; transition: opacity 0.2s; }
+.login-btn:active { opacity: 0.7; }
+.login-error { font-size: 12px; color: var(--red); text-align: center; margin-top: 10px; min-height: 18px; }
+.login-dots { display: flex; gap: 8px; justify-content: center; margin-top: 32px; }
+.login-dot { width: 6px; height: 6px; border-radius: 50%; opacity: 0.2; }
+.login-dot.barrys { background: var(--barrys); } .login-dot.othership { background: var(--othership); }
+.login-dot.avant { background: var(--avant); } .login-dot.rumble { background: var(--rumble); }
+#dashboard { display: none; padding: 16px; max-width: 480px; margin: 0 auto; }
+#dashboard.visible { display: block; }
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+.header-title { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+.header-title span { opacity: 0.5; font-weight: 400; }
+.last-updated { font-size: 11px; color: var(--muted); }
+/* FIX: lock button â clean text, no broken emoji */
+.lock-btn { background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 8px; padding: 5px 12px; font-size: 12px; cursor: pointer; letter-spacing: 0.2px; display: flex; align-items: center; gap: 5px; }
+.lock-btn:hover { border-color: var(--muted); }
+.cards { display: flex; flex-direction: column; gap: 12px; }
+.card { background: var(--surface); border-radius: 16px; padding: 18px; border: 1px solid var(--border); position: relative; overflow: hidden; }
+.card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+.card.barrys::before { background: var(--barrys); } .card.othership::before { background: var(--othership); }
+.card.avant::before { background: var(--avant); } .card.rumble::before { background: var(--rumble); }
+.card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+.studio-name { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.5; }
+.status-pill { font-size: 10px; font-weight: 600; letter-spacing: 0.5px; padding: 3px 8px; border-radius: 20px; text-transform: uppercase; }
+.status-active { background: #1a3326; color: var(--green); }
+.status-warning { background: #2e2510; color: var(--yellow); }
+.status-low { background: #2e1010; color: var(--red); }
+.credit-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 10px; }
+.credit-count { font-size: 48px; font-weight: 800; line-height: 1; letter-spacing: -2px; }
+.credit-label { font-size: 14px; color: var(--muted); margin-bottom: 2px; }
+.credit-of { font-size: 16px; color: var(--muted); font-weight: 400; }
+.progress-wrap { background: var(--surface2); border-radius: 4px; height: 5px; margin-bottom: 10px; overflow: hidden; }
+.progress-bar { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+.barrys .progress-bar { background: var(--barrys); } .othership .progress-bar { background: var(--othership); }
+.avant .progress-bar { background: var(--avant); } .rumble .progress-bar { background: var(--rumble); }
+.meta-row { display: flex; justify-content: space-between; align-items: center; }
+.meta-item { display: flex; flex-direction: column; gap: 2px; }
+.meta-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
+.meta-value { font-size: 13px; font-weight: 600; }
+ /* FIX: future dates never red â" only expired dates get urgent/red */
+.meta-value.urgent { color: var(--red); }
+.meta-value.warn { color: var(--yellow); }
+.meta-value.ok { color: var(--green); }
+.card-divider { height: 1px; background: var(--border); margin: 12px 0; }
+.frozen-notice { display: flex; align-items: center; gap: 8px; margin-top: 10px; background: rgba(111,160,224,0.08); border: 1px solid rgba(111,160,224,0.2); border-radius: 8px; padding: 8px 10px; font-size: 11px; color: #6fa0e0; }
+.membership-badge { font-size: 28px; font-weight: 800; letter-spacing: -1px; margin-bottom: 4px; }
+.membership-sub { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+.renewal-row { display: flex; justify-content: space-between; margin-bottom: 14px; }
+.perk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
+.perk-card { background: var(--surface2); border-radius: 10px; padding: 12px; border: 1px solid var(--border); }
+.perk-name { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.perk-count { font-size: 28px; font-weight: 800; letter-spacing: -1px; line-height: 1; }
+.perk-cycle { font-size: 10px; color: var(--muted); margin-top: 2px; }
+.perk-bar-wrap { background: var(--border); border-radius: 3px; height: 3px; margin-top: 8px; overflow: hidden; }
+.perk-bar { height: 100%; border-radius: 3px; background: var(--avant); transition: width 0.5s ease; }
+.upcoming-classes { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.class-pill { background: var(--surface2); border-radius: 20px; padding: 4px 10px; font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 5px; }
+.class-dot { width: 6px; height: 6px; border-radius: 50%; }
+.footer { margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border); text-align: center; font-size: 11px; color: var(--muted); }
+@media (min-width: 400px) { #dashboard { padding: 20px; } }
+ /* ââ Tab navigation âââââââââââââââââââââââââââââââââââââ */
+.tab-nav { display:flex; gap:0; margin-bottom:18px; border-bottom:1px solid var(--border); }
+.tab-btn { flex:1; background:none; border:none; border-bottom:2px solid transparent; color:var(--muted); padding:10px 0; cursor:pointer; font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase; margin-bottom:-1px; transition:color .15s,border-color .15s; }
+.tab-btn.active { color:var(--text); border-bottom-color:var(--avant); }
+.tab-content { display:none; }
+.tab-content.active { display:block; }
+/* ââ Today tab ââââââââââââââââââââââââââââââââââââââââââ */
+.today-date { font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:14px; padding-top:2px; }
+.today-section-lbl { font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
+.cls-item { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--border); }
+.cls-item:last-child { border-bottom:none; }
+.cls-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.cls-time { font-size:13px; font-weight:700; min-width:72px; }
+.cls-name { font-size:13px; }
+.cls-studio { font-size:10px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; color:var(--muted); margin-top:1px; }
+.rest-msg { text-align:center; padding:18px 0; color:var(--muted); font-size:13px; }
+.if-bar { font-size:11px; color:var(--muted); background:var(--surface2); border-radius:6px; padding:6px 10px; margin-bottom:12px; }
+.meal-row { display:flex; gap:12px; padding:9px 0; border-bottom:1px solid var(--border); }
+.meal-row:last-child { border-bottom:none; }
+.meal-time { font-size:11px; font-weight:700; color:var(--muted); min-width:68px; padding-top:2px; }
+.meal-body { flex:1; }
+.meal-title { font-size:13px; font-weight:600; }
+.meal-sub { font-size:11px; color:var(--muted); margin-top:2px; line-height:1.4; }
+.hc-tag { display:inline-block; font-size:9px; font-weight:700; letter-spacing:.3px; background:rgba(139,111,212,.15); color:var(--avant); border-radius:3px; padding:2px 5px; margin-top:3px; }
+.hc-rec-tag { display:inline-block; font-size:9px; font-weight:700; letter-spacing:.3px; background:rgba(245,200,66,.1); color:var(--yellow); border-radius:3px; padding:2px 5px; margin-top:3px; }
+.rec-row { display:flex; justify-content:space-between; align-items:flex-start; padding:9px 0; border-bottom:1px solid var(--border); }
+.rec-row:last-child { border-bottom:none; }
+.rec-label { font-size:13px; font-weight:600; }
+.rec-sub { font-size:11px; color:var(--muted); margin-top:2px; }
+.rec-cta { font-size:11px; font-weight:700; color:var(--avant); white-space:nowrap; padding-left:8px; padding-top:2px; }
+.haven-banner { display:flex; justify-content:space-between; align-items:center; background:rgba(139,111,212,.1); border:1px solid rgba(139,111,212,.25); border-radius:10px; padding:10px 14px; margin-top:10px; }
+.haven-banner-lhs .haven-banner-title { font-size:13px; font-weight:700; }
+.haven-banner-lhs .haven-banner-sub { font-size:11px; color:var(--muted); margin-top:2px; }
+.haven-banner-num { font-size:30px; font-weight:800; color:var(--avant); letter-spacing:-1px; }
+/* ââ Day Brief ââââââââââââââââââââââââââââââââââââââââââ */
+.brief-score { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+.brief-ring { width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:800; flex-shrink:0; letter-spacing:-1px; border:2.5px solid; }
+.brief-ring.high { background:rgba(76,175,125,.12); color:var(--green); border-color:var(--green); }
+.brief-ring.moderate { background:rgba(245,200,66,.12); color:var(--yellow); border-color:var(--yellow); }
+.brief-ring.low { background:rgba(232,52,42,.12); color:var(--red); border-color:var(--red); }
+.brief-headline { font-size:14px; font-weight:700; margin-bottom:3px; }
+.brief-sub { font-size:12px; color:var(--muted); line-height:1.45; }
+.brief-metrics { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin:12px 0; }
+.brief-metric { background:var(--surface2); border-radius:8px; padding:8px 10px; }
+.brief-metric-val { font-size:20px; font-weight:800; letter-spacing:-0.5px; line-height:1; }
+.brief-metric-lbl { font-size:9px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; color:var(--muted); margin-top:3px; }
+.brief-metric.ok .brief-metric-val { color:var(--green); }
+.brief-metric.warn .brief-metric-val { color:var(--yellow); }
+.brief-metric.bad .brief-metric-val { color:var(--red); }
+.brief-section-lbl { font-size:9px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+.brief-focus { background:rgba(139,111,212,.08); border:1px solid rgba(139,111,212,.2); border-radius:8px; padding:10px 12px; margin-bottom:10px; }
+.brief-focus-text { font-size:12px; line-height:1.6; }
+.goal-bar-row { display:flex; align-items:center; gap:8px; padding:5px 0; border-bottom:1px solid var(--border); }
+.goal-bar-row:last-child { border-bottom:none; }
+.goal-bar-lbl { font-size:11px; color:var(--muted); width:116px; flex-shrink:0; }
+.goal-bar-track { flex:1; background:var(--surface2); border-radius:3px; height:4px; overflow:hidden; }
+.goal-bar-fill { height:100%; border-radius:3px; background:var(--avant); transition:width .5s ease; }
+.goal-bar-fill.ok { background:var(--green); }
+.goal-bar-fill.warn { background:var(--yellow); }
+.goal-bar-fill.bad { background:var(--red); }
+.goal-bar-val { font-size:11px; font-weight:700; width:38px; text-align:right; flex-shrink:0; }
+.hc-week-tag { display:inline-block; font-size:9px; font-weight:700; letter-spacing:.3px; background:rgba(139,111,212,.15); color:var(--avant); border-radius:3px; padding:2px 5px; margin:2px 2px 0 0; }
+</style>
 </head>
 <body>
+
 <div id="login-screen">
-  <div class="login-logo">Fitness <span>Credits</span></div>
+  <div class="login-logo">Fitness <span>Assistant</span></div>
   <div class="login-sub">Lucien's workout tracker</div>
   <div class="login-box">
     <label class="login-label" for="pass-input">Passcode</label>
-    <input class="login-input" id="pass-input" type="password" placeholder="â¢â¢â¢â¢â¢â¢â¢â¢" autocomplete="current-password" autofocus />
+    <input class="login-input" id="pass-input" type="password" placeholder="&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;" autocomplete="current-password" autofocus />
     <button class="login-btn" onclick="doLogin()">Unlock</button>
     <div class="login-error" id="login-error"></div>
   </div>
@@ -215,18 +165,29 @@
     <div class="login-dot rumble"></div>
   </div>
 </div>
+
 <div id="dashboard">
   <div class="header">
     <div>
-      <div class="header-title">Fitness <span>Credits</span></div>
+      <div class="header-title">Fitness <span>Assistant</span></div>
       <div class="last-updated" id="lastUpdated">Updated just now</div>
     </div>
-    <button class="lock-btn" onclick="doLock()">ð Lock</button>
+    <!-- FIX: use SVG lock icon instead of emoji to avoid encoding issues -->
+    <button class="lock-btn" onclick="doLock()">
+      <svg width="11" height="13" viewBox="0 0 11 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="5.5" width="9" height="7" rx="1.5" stroke="currentColor" stroke-width="1.3"/>
+        <path d="M3.5 5.5V3.5a2 2 0 0 1 4 0v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+      </svg>
+      Lock
+    </button>
   </div>
+
   <div class="tab-nav">
     <button class="tab-btn active" id="tab-btn-today" onclick="switchTab('today')">Today</button>
     <button class="tab-btn" id="tab-btn-credits" onclick="switchTab('credits')">Credits</button>
   </div>
+
+  <!-- TODAY TAB -->
   <div id="tab-today" class="tab-content active">
     <div class="today-date" id="today-date"></div>
     <div class="cards">
@@ -240,7 +201,7 @@
       </div>
       <div class="card" style="background:var(--surface);border:1px solid var(--border)">
         <div class="card-top"><div class="studio-name">Meal Plan</div></div>
-        <div class="if-bar" id="today-if-bar">Loadingâ¦</div>
+        <div class="if-bar" id="today-if-bar">Loading&hellip;</div>
         <div id="today-meals"></div>
       </div>
       <div class="card" style="background:var(--surface);border:1px solid var(--border)">
@@ -249,471 +210,532 @@
       </div>
     </div>
   </div>
+
+  <!-- CREDITS TAB -->
   <div id="tab-credits" class="tab-content">
-  <div class="cards">
-    <div class="card barrys">
-      <div class="card-top"><div class="studio-name">Barry's</div><div class="status-pill" id="barrys-status">Active</div></div>
-      <div class="credit-row"><div class="credit-count" id="barrys-credits">13</div><div><div class="credit-label">credits left</div><div class="credit-of" id="barrys-of">of 20</div></div></div>
-      <div class="progress-wrap"><div class="progress-bar" id="barrys-bar" style="width:65%"></div></div>
-      <div class="meta-row">
-        <div class="meta-item"><div class="meta-label">Expires</div><div class="meta-value" id="barrys-expiry">Dec 10, 2026</div></div>
-        <div class="meta-item" style="text-align:right"><div class="meta-label">Package</div><div class="meta-value" style="font-size:11px;color:var(--muted)">20 Classes Â· Holiday Sale</div></div>
+    <div class="cards">
+
+      <!-- Barry's -->
+      <div class="card barrys">
+        <div class="card-top"><div class="studio-name">Barry's</div><div class="status-pill" id="barrys-status">Active</div></div>
+        <div class="credit-row"><div class="credit-count" id="barrys-credits">13</div><div><div class="credit-label">credits left</div><div class="credit-of" id="barrys-of">of 20</div></div></div>
+        <div class="progress-wrap"><div class="progress-bar" id="barrys-bar" style="width:65%"></div></div>
+        <div class="meta-row">
+          <div class="meta-item"><div class="meta-label">Expires</div><div class="meta-value" id="barrys-expiry">Dec 10, 2026</div></div>
+          <div class="meta-item" style="text-align:right"><div class="meta-label">Package</div><div class="meta-value" style="font-size:11px;color:var(--muted)">20 Classes &middot; Holiday Sale</div></div>
+        </div>
+        <div class="upcoming-classes" id="barrys-classes">
+          <div class="class-pill"><div class="class-dot" style="background:var(--barrys)"></div>Sat 10:10am booked</div>
+        </div>
       </div>
-      <div class="upcoming-classes"><div class="class-pill"><div class="class-dot" style="background:var(--barrys)"></div>Sat 10:10am booked</div></div>
+
+      <!-- Othership -->
+      <div class="card othership">
+        <div class="card-top"><div class="studio-name">Othership</div><div class="status-pill status-active" id="othership-status">Active</div></div>
+        <div class="credit-row"><div class="credit-count" id="othership-credits">6</div><div><div class="credit-label">credits left</div><div class="credit-of" id="othership-of">of 10</div></div></div>
+        <div class="progress-wrap"><div class="progress-bar" id="othership-bar" style="width:60%"></div></div>
+        <div class="meta-row">
+          <div class="meta-item"><div class="meta-label">Expires</div><div class="meta-value" id="othership-expiry">May 27, 2026</div></div>
+          <div class="meta-item" style="text-align:right"><div class="meta-label">Package</div><div class="meta-value" style="font-size:11px;color:var(--muted)">Toronto 10 Pack</div></div>
+        </div>
+        <div class="upcoming-classes" id="othership-classes">
+          <div class="class-pill"><div class="class-dot" style="background:var(--othership)"></div>Fri Mar 20 &middot; 7:45pm Sauna</div>
+        </div>
+        <div class="card-divider"></div>
+        <div class="frozen-notice"><span>&#x2744;&#xFE0F;</span><div>4x Monthly Membership frozen &middot; unfreezes <strong>May 13, 2026</strong></div></div>
+      </div>
+
+      <!-- Avant -->
+      <div class="card avant">
+        <div class="card-top"><div class="studio-name">Avant</div><div class="status-pill status-active">Active</div></div>
+        <div class="membership-badge">GARDE</div>
+        <div class="membership-sub">AVT Yorkville &middot; Biweekly Membership</div>
+        <div class="renewal-row">
+          <div class="meta-item"><div class="meta-label">Next Renewal</div><div class="meta-value" id="avant-renewal">Apr 3, 2026</div></div>
+          <div class="meta-item" style="text-align:right"><div class="meta-label">Amount</div><div class="meta-value">$197.75</div></div>
+        </div>
+        <div class="perk-grid">
+          <div class="perk-card"><div class="perk-name">Align</div><div class="perk-count" id="avant-align-count">4</div><div class="perk-cycle">of 4 per cycle</div><div class="perk-bar-wrap"><div class="perk-bar" id="avant-align-bar" style="width:100%"></div></div></div>
+          <div class="perk-card"><div class="perk-name">Haven (Core Recovery)</div><div class="perk-count" id="avant-haven-count">2</div><div class="perk-cycle">of 2 per cycle</div><div class="perk-bar-wrap"><div class="perk-bar" id="avant-haven-bar" style="width:100%"></div></div></div>
+        </div>
+        <div class="upcoming-classes" id="avant-classes" style="margin-top:10px">
+          <div class="class-pill"><div class="class-dot" style="background:var(--avant)"></div>Sat Mar 28 &middot; 12:50pm Vinyasa</div>
+          <div class="class-pill"><div class="class-dot" style="background:var(--avant)"></div>Tue Mar 24 &middot; 6pm Precision L3</div>
+          <div class="class-pill"><div class="class-dot" style="background:var(--avant)"></div>Mon Mar 23 &middot; 6:30pm LF3 Heavy</div>
+        </div>
+      </div>
+
+      <!-- Rumble -->
+      <div class="card rumble">
+        <div class="card-top"><div class="studio-name">Rumble Boxing</div><div class="status-pill" id="rumble-status">Active</div></div>
+        <div class="credit-row"><div class="credit-count" id="rumble-credits">9</div><div><div class="credit-label">credits left</div><div class="credit-of" id="rumble-of">of 10</div></div></div>
+        <div class="progress-wrap"><div class="progress-bar" id="rumble-bar" style="width:90%"></div></div>
+        <div class="meta-row">
+          <div class="meta-item"><div class="meta-label">Expires</div><div class="meta-value" id="rumble-expiry">Mar 11, 2027</div></div>
+          <div class="meta-item" style="text-align:right"><div class="meta-label">Package</div><div class="meta-value" style="font-size:11px;color:var(--muted)">FT Intro 10 Pack</div></div>
+        </div>
+      </div>
+
     </div>
-    <div class="card othership">
-      <div class="card-top"><div class="studio-name">Othership</div><div class="status-pill status-active" id="othership-status">Active</div></div>
-      <div class="credit-row"><div class="credit-count" id="othership-credits">6</div><div><div class="credit-label">credits left</div><div class="credit-of" id="othership-of">of 10</div></div></div>
-      <div class="progress-wrap"><div class="progress-bar" id="othership-bar" style="width:60%"></div></div>
-      <div class="meta-row">
-        <div class="meta-item"><div class="meta-label">Expires</div><div class="meta-value" id="othership-expiry">May 27, 2026</div></div>
-        <div class="meta-item" style="text-align:right"><div class="meta-label">Package</div><div class="meta-value" style="font-size:11px;color:var(--muted)">Toronto 10 Pack</div></div>
-      </div>
-      <div class="upcoming-classes"><div class="class-pill"><div class="class-dot" style="background:var(--othership)"></div>Fri Mar 20 Â· 7:45pm Sauna</div></div>
-      <div class="card-divider"></div>
-      <div class="frozen-notice"><span>âï¸</span><div>4x Monthly Membership frozen Â· unfreezes <strong>May 13, 2026</strong></div></div>
-    </div>
-    <div class="card avant">
-      <div class="card-top"><div class="studio-name">Avant</div><div class="status-pill status-active">Active</div></div>
-      <div class="membership-badge">GARDE</div>
-      <div class="membership-sub">AVT Yorkville Â· Biweekly Membership</div>
-      <div class="renewal-row">
-        <div class="meta-item"><div class="meta-label">Next Renewal</div><div class="meta-value" id="avant-renewal">Mar 20, 2026</div></div>
-        <div class="meta-item" style="text-align:right"><div class="meta-label">Amount</div><div class="meta-value">$197.75</div></div>
-      </div>
-      <div class="perk-grid">
-        <div class="perk-card"><div class="perk-name">Align</div><div class="perk-count" id="avant-align-count">4</div><div class="perk-cycle">of 4 per cycle</div><div class="perk-bar-wrap"><div class="perk-bar" id="avant-align-bar" style="width:100%"></div></div></div>
-        <div class="perk-card"><div class="perk-name">Haven</div><div class="perk-count" id="avant-haven-count">2</div><div class="perk-cycle">of 2 per cycle</div><div class="perk-bar-wrap"><div class="perk-bar" id="avant-haven-bar" style="width:100%"></div></div></div>
-      </div>
-      <div class="upcoming-classes" style="margin-top:10px">
-        <div class="class-pill"><div class="class-dot" style="background:var(--avant)"></div>Sat 12:50pm Vinyasa</div>
-        <div class="class-pill"><div class="class-dot" style="background:var(--avant)"></div>Tue 6pm Precision L3</div>
-        <div class="class-pill"><div class="class-dot" style="background:var(--avant)"></div>Mon 6:30pm LF3 Heavy</div>
-      </div>
-    </div>
-    <div class="card rumble">
-      <div class="card-top"><div class="studio-name">Rumble Boxing</div><div class="status-pill" id="rumble-status">Active</div></div>
-      <div class="credit-row"><div class="credit-count" id="rumble-credits">9</div><div><div class="credit-label">credits left</div><div class="credit-of" id="rumble-of">of 10</div></div></div>
-      <div class="progress-wrap"><div class="progress-bar" id="rumble-bar" style="width:90%"></div></div>
-      <div class="meta-row">
-        <div class="meta-item"><div class="meta-label">Expires</div><div class="meta-value" id="rumble-expiry">Mar 11, 2027</div></div>
-        <div class="meta-item" style="text-align:right"><div class="meta-label">Package</div><div class="meta-value" style="font-size:11px;color:var(--muted)">FT Intro 10 Pack</div></div>
-      </div>
-    </div>
-  </div>
   </div><!-- /tab-credits -->
-  <div class="footer">Auto-refreshed daily Â· Barry's Â· Othership Â· Avant Â· Rumble</div>
+
+  <div class="footer">Fitness Assistant &middot; Auto-refreshed daily &middot; Barry's &middot; Othership &middot; Avant &middot; Rumble</div>
 </div>
+
 <script>
-  const DATA = {
-    lastUpdated: "2026-03-19T12:00:00",
-    barrys: { credits: 13, total: 20, expiry: "2026-12-10", classes: [{ day:"Sat", time:"10:10am", label:"Booked class", intensity:"high" }] },
-    othership: { credits: 6, total: 10, expiry: "2026-05-27", classes: [{ date:"2026-03-20", time:"7:45pm", label:"Sauna", intensity:"recovery" }] },
-    avant: {
-      nextRenewal: "2026-03-20", amount: 197.75,
-      align: { available: 4, perCycle: 4 },
-      haven: { available: 2, perCycle: 2 },
-      classes: [{ day:"Sat", time:"12:50pm", label:"Vinyasa", intensity:"moderate" }, { day:"Mon", time:"6:30pm", label:"LF3 Heavy", intensity:"high" }, { day:"Tue", time:"6pm", label:"Precision L3", intensity:"high" }]
-    },
-    rumble: { credits: 9, total: 10, expiry: "2027-03-11", classes: [] },
-    profile: {
-      ifWindow: { start: 12, end: 20 }  // 16:8 â noon to 8 PM; adjust start/end as needed
-    },
-    hiChef: {
-      // Add current Hi Chef meals here:
-      // { name: "Meal Name", type: "lunch" or "dinner", servings: 2, expires: "YYYY-MM-DD" }
-      meals: []
-    },
-    health: {
-      // ── Sync from Apple Health each morning ─────────────────
-      sleep:       { hours: 7.5, deep: 1.2, rem: 1.9 },  // last night (hours)
-      hrv:         52,    // ms — morning HRV (Apple Health or Oura)
-      restingHR:   58,    // bpm
-      steps:       { yesterday: 9200, weekAvg: 7800 },
-      activeKcal:  480    // active calories burned yesterday
-    },
-    goals: {
-      weeklyWorkouts: 4,   // target sessions per week
-      dailySteps:    10000,
-      sleepHours:    8,
-      hrvBaseline:   55    // your personal baseline — update after 2–3 weeks of data
-    },
-    week: {
-      // ── Update daily ────────────────────────────────────────
-      workoutsCompleted: 0,   // sessions completed Mon–today
-      // Hi Chef meals eaten this week (log after eating):
-      // { name: "Meal Name", type: "lunch"|"dinner", day: "Mon" }
-      hiChefConsumed: []
-    }
-  };
-  const PASS_HASH = "8cf9cb7e91de81cd2034caed244460f97334ef154ce07f59e3dda766c38cb6e9";
-  async function sha256(str) {
-    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+const DATA = {
+  lastUpdated: "2026-03-21T12:10:50",
+  barrys: {
+    credits: 13, total: 20, expiry: "2026-12-10",
+    classes: [
+      { date:"2026-03-28", time:"10:10am", label:"Barry's class", intensity:"high" }
+    ]
+  },
+  othership: {
+    credits: 6, total: 10, expiry: "2026-05-27",
+    classes: [
+      { date:"2026-03-20", time:"7:45pm", label:"Sauna", intensity:"recovery" }
+    ]
+  },
+  avant: {
+    nextRenewal: "2026-04-03", amount: 197.75,
+    align: { available: 4, perCycle: 4 },
+    haven: { available: 2, perCycle: 2 },
+    classes: [
+      { date:"2026-03-28", time:"12:50pm", label:"Vinyasa", intensity:"moderate" },
+      { date:"2026-03-23", time:"6:30pm",  label:"LF3 Heavy", intensity:"high" },
+      { date:"2026-03-24", time:"6pm",     label:"Precision L3", intensity:"high" }
+    ]
+  },
+  rumble: { credits: 9, total: 10, expiry: "2027-03-11", classes: [] },
+  profile: { ifWindow: { start: 12, end: 20 } },
+  hiChef: {
+    // Updated by Wednesday Hi Chef task each week
+    // weekOf: "2026-03-23",  // Monday the order covers
+    // meals: [
+    //   { name: "Meal Name", day: "Mon", macros: { cal: 950, protein: 48, carbs: 95, fat: 28 } },
+    //   { name: "Meal Name", day: "Tue", macros: { cal: 920, protein: 45, carbs: 100, fat: 26 } },
+    //   ...
+    // ],
+    // yogurts: 3
+    weekOf: null,
+    meals: [],
+    yogurts: 0
+  },
+  health: {
+    sleep: { hours: 7.5, deep: 1.2, rem: 1.9 },
+    hrv: 52,
+    restingHR: 58,
+    steps: { yesterday: 9200, weekAvg: 7800 },
+    activeKcal: 480
+  },
+  goals: {
+    weeklyWorkouts: 4, dailySteps: 10000, sleepHours: 8, hrvBaseline: 55
+  },
+  week: {
+    workoutsCompleted: 0,
+    hiChefConsumed: []
   }
+};
 
-  /* ââ Tab switching âââââââââââââââââââââââââââââââââââ */
-  function switchTab(tab) {
-    ['today','credits'].forEach(function(t) {
-      document.getElementById('tab-btn-'+t).classList.toggle('active', t===tab);
-      document.getElementById('tab-'+t).classList.toggle('active', t===tab);
+const PASS_HASH = "8cf9cb7e91de81cd2034caed244460f97334ef154ce07f59e3dda766c38cb6e9";
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+/* ââ Tab switching âââââââââââââââââââââââââââââââââââââ */
+function switchTab(tab) {
+  ['today','credits'].forEach(function(t) {
+    document.getElementById('tab-btn-'+t).classList.toggle('active', t===tab);
+    document.getElementById('tab-'+t).classList.toggle('active', t===tab);
+  });
+}
+
+/* ââ Helpers âââââââââââââââââââââââââââââââââââââââââââ */
+function parseClassMin(t) {
+  var m=t.match(/(\d+):?(\d{0,2})\s*(am|pm)/i);
+  if(!m) return -1;
+  var h=parseInt(m[1]),mn=parseInt(m[2])||0,ap=m[3].toLowerCase();
+  if(ap==='pm'&&h!==12) h+=12;
+  if(ap==='am'&&h===12) h=0;
+  return h*60+mn;
+}
+function fmt12(h,m) {
+  var ap=h<12?'AM':'PM', h12=h%12||12;
+  return h12+':'+(m?String(m).padStart(2,'0'):'00')+'\u202f'+ap;
+}
+
+/* ââ getTodayClasses â now uses date field (YYYY-MM-DD) â */
+function getTodayClasses() {
+  var now=new Date();
+  var todayStr=now.toISOString().slice(0,10);
+  var days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var todayDay=days[now.getDay()];
+  var studios=[
+    {key:'barrys',   name:"Barry's",  color:'var(--barrys)'},
+    {key:'othership',name:'Othership',color:'var(--othership)'},
+    {key:'avant',    name:'Avant',    color:'var(--avant)'},
+    {key:'rumble',   name:'Rumble',   color:'var(--rumble)'}
+  ];
+  var result=[];
+  studios.forEach(function(s) {
+    (DATA[s.key].classes||[]).forEach(function(c) {
+      var today = c.date ? c.date===todayStr : c.day===todayDay;
+      if(today) result.push(Object.assign({},c,{studio:s.name,color:s.color,min:parseClassMin(c.time)}));
     });
+  });
+  return result.sort(function(a,b){return a.min-b.min;});
+}
+
+/* ââ getMealPlan â Hi Chef day-matching + smart recs âââ */
+function getMealPlan(classes) {
+  var now=new Date();
+  var dayNames=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var todayDay=dayNames[now.getDay()];
+  var ifw=DATA.profile.ifWindow, start=ifw.start, end=ifw.end;
+  var meals=DATA.hiChef.meals||[];
+
+  var isHigh=classes.some(function(c){return /heavy|lf3|boxing|precision|strike/i.test(c.label);});
+  var isHIIT=classes.some(function(c){return /hiit|sweat box/i.test(c.label);});
+  var isRec =classes.some(function(c){return /sauna|yoga|vinyasa|align|toolbox/i.test(c.label);});
+  var isRest=classes.length===0;
+
+  var eveningCls=classes.filter(function(c){return c.min>=17*60;}).sort(function(a,b){return a.min-b.min;})[0];
+
+  // Find today's Hi Chef meal by day of week
+  var todayMeal=meals.find(function(m){ return m.day===todayDay; });
+
+  var hcTag=null, lunchSub='', lunchTagType='hc';
+  if(todayMeal) {
+    hcTag=todayMeal.name;
+    var mac=todayMeal.macros;
+    lunchSub=mac
+      ? mac.cal+'&thinsp;kcal &middot; '+mac.protein+'g protein &middot; '+mac.carbs+'g carbs &middot; '+mac.fat+'g fat'
+      : 'Hi Chef meal &mdash; break your fast with this';
+  } else {
+    // No Hi Chef today â show personalised recommendation
+    lunchTagType='rec';
+    if(isHigh) {
+      hcTag='No Hi Chef \u2014 Strength day rec';
+      lunchSub='Aim: 900\u20131,000&thinsp;kcal &middot; \u226545g protein &middot; 85\u2013105g carbs &middot; 25\u201335g fat &middot; Max protein for recovery';
+    } else if(isHIIT) {
+      hcTag='No Hi Chef \u2014 HIIT day rec';
+      lunchSub='Aim: 900\u20131,000&thinsp;kcal &middot; \u226540g protein &middot; 100\u2013120g carbs &middot; 20\u201330g fat &middot; High-carb to restore glycogen';
+    } else if(isRec) {
+      hcTag='No Hi Chef \u2014 Recovery day rec';
+      lunchSub='Aim: 700\u2013800&thinsp;kcal &middot; \u226535g protein &middot; 60\u201380g carbs &middot; 28\u201338g fat &middot; Light, anti-inflammatory';
+    } else if(isRest) {
+      hcTag='No Hi Chef \u2014 Rest day rec';
+      lunchSub='Aim: 700\u2013800&thinsp;kcal &middot; \u226535g protein &middot; 55\u201370g carbs &middot; 25\u201335g fat &middot; Lower carbs, maintain protein';
+    } else {
+      hcTag='No Hi Chef \u2014 Cardio day rec';
+      lunchSub='Aim: 850\u2013950&thinsp;kcal &middot; \u226540g protein &middot; 95\u2013115g carbs &middot; 22\u201332g fat &middot; Sustained-energy carbs';
+    }
   }
 
-  /* ââ Today tab helpers âââââââââââââââââââââââââââââââ */
-  function parseClassMin(t) {
-    var m=t.match(/(\d+):?(\d{0,2})\s*(am|pm)/i);
-    if(!m) return -1;
-    var h=parseInt(m[1]),mn=parseInt(m[2])||0,ap=m[3].toLowerCase();
-    if(ap==='pm'&&h!==12) h+=12; if(ap==='am'&&h===12) h=0;
-    return h*60+mn;
-  }
-  function fmt12(h,m) {
-    var ap=h<12?'AM':'PM', h12=h%12||12;
-    return h12+':'+(m?String(m).padStart(2,'0'):'00')+'\u202f'+ap;
-  }
-  function getTodayClasses() {
-    var now=new Date();
-    var todayStr=now.toISOString().slice(0,10);
-    var days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-    var todayDay=days[now.getDay()];
-    var studios=[
-      {key:'barrys',  name:"Barry's",  color:'var(--barrys)'},
-      {key:'othership',name:'Othership',color:'var(--othership)'},
-      {key:'avant',   name:'Avant',    color:'var(--avant)'},
-      {key:'rumble',  name:'Rumble',   color:'var(--rumble)'}
-    ];
-    var result=[];
-    studios.forEach(function(s) {
-      (DATA[s.key].classes||[]).forEach(function(c) {
-        var today=c.date?c.date===todayStr:c.day===todayDay;
-        if(today) result.push(Object.assign({},c,{studio:s.name,color:s.color,min:parseClassMin(c.time)}));
+  var tagHtml = hcTag
+    ? '<div class="'+(lunchTagType==='rec'?'hc-rec-tag':'hc-tag')+'">'+(lunchTagType==='rec'?'&#x1F4A1; ':'&#x1F37D; ')+hcTag+'</div>'
+    : '';
+
+  var slots=[];
+
+  // Break fast slot
+  slots.push({
+    time:fmt12(start,0),
+    title:'Break fast',
+    sub: lunchSub,
+    tagHtml: tagHtml
+  });
+
+  // Pre-workout fuel (high-intensity evening class)
+  if(eveningCls&&(isHigh||isHIIT)) {
+    var preMin=eveningCls.min-120;
+    if(preMin>start*60) {
+      slots.push({
+        time:fmt12(Math.floor(preMin/60),preMin%60),
+        title:'Pre-workout fuel ('+eveningCls.label+')',
+        sub:'Complex carbs + light protein \u2014 rice cake, banana, chicken wrap',
+        tagHtml:''
       });
-    });
-    return result.sort(function(a,b){return a.min-b.min;});
+    }
   }
-  function getMealPlan(classes) {
-    var ifw=DATA.profile.ifWindow, start=ifw.start, end=ifw.end;
-    var meals=DATA.hiChef.meals||[];
-    var isHigh=classes.some(function(c){return /heavy|lf3|boxing|precision/i.test(c.label);});
-    var isRec=classes.some(function(c){return /sauna|yoga|vinyasa/i.test(c.label);});
-    var eveningCls=classes.filter(function(c){return c.min>=17*60;}).sort(function(a,b){return a.min-b.min;})[0];
-    var slots=[];
-    var lunchMeal=meals.find(function(m){return m.type==='lunch';});
-    var dinnerMeal=meals.find(function(m){return m.type==='dinner';});
-    // Break fast
+
+  // Dinner / post-workout
+  var dinnerH=eveningCls?Math.min(Math.floor((eveningCls.min+60)/60),end-1):end-2;
+  slots.push({
+    time:fmt12(dinnerH,0),
+    title:isHigh?'Post-workout dinner':'Dinner',
+    sub:(isHigh||isHIIT)
+      ? 'High protein \u2014 aim 40\u201350g for muscle recovery. Lean meat, legumes, rice'
+      : 'Balanced dinner \u2014 protein, veg, complex carbs',
+    tagHtml:''
+  });
+
+  // Close window snack
+  if(dinnerH<end-1) {
     slots.push({
-      time:fmt12(start,0), title:'Break fast',
-      sub: isHigh?'Protein-forward \u2014 eggs, Greek yogurt, cottage cheese' :
-           isRec ?'Light meal \u2014 smoothie, fruit, or oats' :
-                  'Balanced meal to open your eating window',
-      hc: lunchMeal?lunchMeal.name:null
+      time:fmt12(end-1,0),
+      title:'Close eating window',
+      sub:'Optional \u2014 nuts, Greek yogurt, or piece of dark chocolate',
+      tagHtml:''
     });
-    // Pre-workout fuel (if high-intensity evening class)
-    if(eveningCls&&isHigh) {
-      var preMin=eveningCls.min-120;
-      if(preMin>start*60) {
-        slots.push({time:fmt12(Math.floor(preMin/60),preMin%60),title:'Pre-workout fuel ('+eveningCls.label+')',
-          sub:'Complex carbs + light protein \u2014 rice cake, banana, chicken wrap',hc:null});
-      }
-    }
-    // Dinner / post-workout
-    var dinnerH=eveningCls?Math.min(Math.floor((eveningCls.min+60)/60),end-1):end-2;
-    slots.push({
-      time:fmt12(dinnerH,0),
-      title:isHigh?'Post-workout dinner':'Dinner',
-      sub:isHigh?'High protein \u2014 aim 40\u201350g for muscle recovery. Lean meat, legumes, rice' :
-                 'Balanced dinner \u2014 protein, veg, complex carbs',
-      hc: dinnerMeal?dinnerMeal.name:null
-    });
-    // Close window snack if room
-    if(dinnerH<end-1) {
-      slots.push({time:fmt12(end-1,0),title:'Close eating window',
-        sub:'Optional \u2014 nuts, Greek yogurt, or piece of dark chocolate',hc:null});
-    }
-    return {slots:slots, windowStr:fmt12(start,0)+' \u2013 '+fmt12(end,0)};
   }
-  function getRecoveryItems(classes) {
-    var haven=DATA.avant.haven.available;
-    var isHigh=classes.some(function(c){return /heavy|lf3|boxing|precision/i.test(c.label);});
-    var hasSauna=classes.some(function(c){return /sauna/i.test(c.label);});
-    var isRest=classes.length===0;
-    var items=[];
-    if(hasSauna) items.push({label:'Sauna booked \u2713',sub:'Excellent passive recovery \u2014 stay well hydrated',cta:false});
-    if(isHigh&&haven>0) items.push({label:'Core Recovery recommended',sub:'Book a Haven session after your heavy class today',cta:true});
-    else if(isRest&&haven>0) items.push({label:'Rest day \u2014 ideal for Core Recovery',sub:'Perfect day for a Haven session at Avant',cta:true});
-    else if(haven>0) items.push({label:haven+' Haven credit'+(haven>1?'s':'')+' available',sub:'Reserve for post-heavy-class or rest days',cta:false});
-    else items.push({label:'No Haven credits remaining',sub:'Credits reset at next billing cycle',cta:false});
-    if(classes.length>0&&!hasSauna) items.push({label:'Post-workout mobility',sub:'10\u201315 min foam roll + stretch reduces DOMS',cta:false});
-    return {items:items,haven:haven};
-  }
-  function renderDaySummary(classes) {
-    var h = DATA.health;
-    var g = DATA.goals;
-    var w = DATA.week;
 
-    // ── Readiness score (0–100) ───────────────────────────────
-    var hrvPct   = h.hrv  ? Math.round(h.hrv / g.hrvBaseline * 100) : 80;
-    var sleepPct = h.sleep.hours ? Math.round(h.sleep.hours / g.sleepHours * 100) : 80;
-    var score    = Math.min(100, Math.round((Math.min(hrvPct,120) + Math.min(sleepPct,120)) / 2));
+  return {slots:slots, windowStr:fmt12(start,0)+' \u2013 '+fmt12(end,0)};
+}
 
-    var tier, tierColor, approach;
-    var hasHeavy = classes.some(function(c){ return /heavy|lf3|boxing|precision/i.test(c.label); });
-    var hasMod   = classes.some(function(c){ return /vinyasa|yoga|align/i.test(c.label); });
-    var isRest   = classes.length === 0;
+function getRecoveryItems(classes) {
+  var haven=DATA.avant.haven.available;
+  var isHigh=classes.some(function(c){return /heavy|lf3|boxing|precision|strike/i.test(c.label);});
+  var hasSauna=classes.some(function(c){return /sauna/i.test(c.label);});
+  var isRest=classes.length===0;
+  var items=[];
+  if(hasSauna) items.push({label:'Sauna booked \u2713',sub:'Excellent passive recovery \u2014 stay well hydrated',cta:false});
+  if(isHigh&&haven>0) items.push({label:'Core Recovery recommended',sub:'Book a Haven session after your heavy class today',cta:true});
+  else if(isRest&&haven>0) items.push({label:'Rest day \u2014 ideal for Core Recovery',sub:'Perfect day for a Haven session at Avant',cta:true});
+  else if(haven>0) items.push({label:haven+' Haven credit'+(haven>1?'s':'')+' available',sub:'Reserve for post-heavy-class or rest days',cta:false});
+  else items.push({label:'No Haven (Core Recovery) credits remaining',sub:'Credits reset at next billing cycle',cta:false});
+  if(classes.length>0&&!hasSauna) items.push({label:'Post-workout mobility',sub:'10\u201315 min foam roll + stretch reduces DOMS',cta:false});
+  return {items:items,haven:haven};
+}
 
-    if (score >= 88) {
-      tier = 'High Readiness'; tierColor = 'high';
-      approach = hasHeavy ? 'Prime day — push intensity in your session. HRV and sleep are both strong.'
-               : isRest   ? 'Great recovery numbers. Consider adding a walk or bonus mobility work.'
-               :            'Strong baseline. Moderate session + good nutrition will compound well today.';
-    } else if (score >= 68) {
-      tier = 'Moderate Readiness'; tierColor = 'moderate';
-      approach = hasHeavy ? 'Solid baseline. Hit the session but listen to your body on heavy sets — scale if needed.'
-               : isRest   ? 'Decent recovery. A light walk and extra hydration will help rebuild for tomorrow.'
-               :            'Good day for moderate effort. Focus on technique and consistency over output.';
-    } else {
-      tier = 'Low Readiness'; tierColor = 'low';
-      approach = hasHeavy ? 'HRV or sleep is flagged. Consider scaling weights significantly or swapping for active recovery.'
-               :            'Active recovery day. Light movement only — prioritise sleep, hydration, and stress reduction tonight.';
-    }
+function renderDaySummary(classes) {
+  var h=DATA.health, g=DATA.goals, w=DATA.week;
+  var hrvPct=h.hrv?Math.round(h.hrv/g.hrvBaseline*100):80;
+  var sleepPct=h.sleep.hours?Math.round(h.sleep.hours/g.sleepHours*100):80;
+  var score=Math.min(100,Math.round((Math.min(hrvPct,120)+Math.min(sleepPct,120))/2));
+  var tier,tierColor,approach;
+  var hasHeavy=classes.some(function(c){return /heavy|lf3|boxing|precision|strike/i.test(c.label);});
+  var isRest=classes.length===0;
+  if(score>=88){tier='High Readiness';tierColor='high';approach=hasHeavy?'Prime day \u2014 push intensity. HRV and sleep are both strong.':isRest?'Great recovery numbers. Consider a walk or bonus mobility work.':'Strong baseline. Moderate session + good nutrition will compound well.';}
+  else if(score>=68){tier='Moderate Readiness';tierColor='moderate';approach=hasHeavy?'Solid baseline. Hit the session but listen to your body on heavy sets \u2014 scale if needed.':isRest?'Decent recovery. A light walk and extra hydration will help rebuild for tomorrow.':'Good day for moderate effort. Focus on technique and consistency.';}
+  else{tier='Low Readiness';tierColor='low';approach=hasHeavy?'HRV or sleep flagged. Consider scaling weights or swapping for active recovery.':'Active recovery day. Light movement only \u2014 prioritise sleep, hydration, stress reduction.';}
+  var sleepSt=h.sleep.hours>=g.sleepHours?'ok':h.sleep.hours>=g.sleepHours*0.875?'warn':'bad';
+  var hrvSt=h.hrv>=g.hrvBaseline?'ok':h.hrv>=g.hrvBaseline*0.80?'warn':'bad';
+  var stepsSt=h.steps.yesterday>=g.dailySteps?'ok':h.steps.yesterday>=g.dailySteps*0.75?'warn':'bad';
+  var stepsDisp=h.steps.yesterday>=1000?(h.steps.yesterday/1000).toFixed(1)+'k':String(h.steps.yesterday);
+  var focus=[];
+  if(h.sleep.hours<g.sleepHours*0.875) focus.push('Sleep: got '+h.sleep.hours+'h \u2014 aim for '+g.sleepHours+'h tonight');
+  if(h.hrv<g.hrvBaseline*0.80) focus.push('HRV below baseline ('+h.hrv+' vs '+g.hrvBaseline+') \u2014 prioritise recovery');
+  if(h.steps.yesterday<g.dailySteps*0.75) focus.push('Steps: '+stepsDisp+' yesterday \u2014 aim for '+(g.dailySteps/1000).toFixed(0)+'k today');
+  var dayOfWeek=new Date().getDay(), daysLeft=7-dayOfWeek, wktsNeeded=g.weeklyWorkouts-w.workoutsCompleted;
+  if(wktsNeeded>daysLeft) focus.push('Workouts: need '+wktsNeeded+' more sessions but only '+daysLeft+' days left this week');
+  if(focus.length===0) focus.push('All metrics on track \u2014 stay consistent \u2713');
+  var consumed=w.hiChefConsumed||[];
+  var wktPct=Math.min(100,Math.round(w.workoutsCompleted/g.weeklyWorkouts*100));
+  var slpPct=Math.min(100,Math.round(h.sleep.hours/g.sleepHours*100));
+  var stpPct=Math.min(100,Math.round(h.steps.yesterday/g.dailySteps*100));
+  function barClass(p){return p>=100?'ok':p>=65?'warn':'bad';}
+  function barColor(p){return p>=100?'green':p>=65?'yellow':'red';}
+  function goalBar(label,pct,valStr){return '<div class="goal-bar-row"><div class="goal-bar-lbl">'+label+'</div><div class="goal-bar-track"><div class="goal-bar-fill '+barClass(pct)+'" style="width:'+pct+'%"></div></div><div class="goal-bar-val" style="color:var(--'+barColor(pct)+'")>'+valStr+'</div></div>';}
+  var hcHtml=consumed.length>0?'<div style="margin-top:10px;"><div class="brief-section-lbl">Hi Chef this week</div><div>'+consumed.map(function(m){return '<span class="hc-week-tag">'+m.day+': '+m.name+'</span>';}).join('')+'</div></div>':'';
+  document.getElementById('today-brief').innerHTML=
+    '<div class="brief-score"><div class="brief-ring '+tierColor+'">'+score+'</div><div><div class="brief-headline">'+tier+'</div><div class="brief-sub">'+approach+'</div></div></div>'+
+    '<div class="brief-metrics"><div class="brief-metric '+sleepSt+'"><div class="brief-metric-val">'+h.sleep.hours+'h</div><div class="brief-metric-lbl">Sleep</div></div><div class="brief-metric '+hrvSt+'"><div class="brief-metric-val">'+(h.hrv||'\u2014')+'</div><div class="brief-metric-lbl">HRV</div></div><div class="brief-metric '+stepsSt+'"><div class="brief-metric-val">'+stepsDisp+'</div><div class="brief-metric-lbl">Steps yest.</div></div></div>'+
+    '<div class="brief-focus"><div class="brief-section-lbl">Focus today</div><div class="brief-focus-text">'+focus.join('<br>')+'</div></div>'+
+    '<div class="brief-section-lbl">Goals this week</div><div>'+goalBar('Workouts',wktPct,w.workoutsCompleted+'/'+g.weeklyWorkouts)+goalBar('Sleep last night',slpPct,h.sleep.hours+'h')+goalBar('Steps yesterday',stpPct,stepsDisp)+'</div>'+hcHtml;
+}
 
-    // ── Metric status ──────────────────────────────────────────
-    var sleepSt = h.sleep.hours >= g.sleepHours       ? 'ok' : h.sleep.hours >= g.sleepHours * 0.875  ? 'warn' : 'bad';
-    var hrvSt   = h.hrv         >= g.hrvBaseline      ? 'ok' : h.hrv         >= g.hrvBaseline  * 0.80  ? 'warn' : 'bad';
-    var stepsSt = h.steps.yesterday >= g.dailySteps   ? 'ok' : h.steps.yesterday >= g.dailySteps * 0.75 ? 'warn' : 'bad';
-    var stepsDisp = h.steps.yesterday >= 1000 ? (h.steps.yesterday/1000).toFixed(1)+'k' : String(h.steps.yesterday);
-
-    // ── Focus items ──────────────────────────────────────────────
-    var focus = [];
-    if (h.sleep.hours < g.sleepHours * 0.875)
-      focus.push('Sleep: got ' + h.sleep.hours + 'h — aim for ' + g.sleepHours + 'h tonight');
-    if (h.hrv < g.hrvBaseline * 0.80)
-      focus.push('HRV below baseline (' + h.hrv + ' vs ' + g.hrvBaseline + ') — prioritise recovery');
-    if (h.steps.yesterday < g.dailySteps * 0.75)
-      focus.push('Steps: ' + stepsDisp + ' yesterday — aim for ' + (g.dailySteps/1000).toFixed(0) + 'k today');
-    var dayOfWeek = new Date().getDay();
-    var daysLeft  = 7 - dayOfWeek;
-    var wktsNeeded = g.weeklyWorkouts - w.workoutsCompleted;
-    if (wktsNeeded > daysLeft)
-      focus.push('Workouts: need ' + wktsNeeded + ' more sessions but only ' + daysLeft + ' days left this week');
-    if (focus.length === 0)
-      focus.push('All metrics on track — stay consistent ✓');
-
-    // ── Hi Chef this week ──────────────────────────────────────────
-    var consumed = w.hiChefConsumed || [];
-
-    // ── Goal bars ──────────────────────────────────────────────────
-    var wktPct   = Math.min(100, Math.round(w.workoutsCompleted / g.weeklyWorkouts * 100));
-    var slpPct   = Math.min(100, Math.round(h.sleep.hours / g.sleepHours * 100));
-    var stpPct   = Math.min(100, Math.round(h.steps.yesterday / g.dailySteps * 100));
-    function barClass(pct) { return pct >= 100 ? 'ok' : pct >= 65 ? 'warn' : 'bad'; }
-    function barColor(pct) { return pct >= 100 ? 'green' : pct >= 65 ? 'yellow' : 'red'; }
-
-    function goalBar(label, pct, valStr) {
-      return '<div class="goal-bar-row">' +
-        '<div class="goal-bar-lbl">' + label + '</div>' +
-        '<div class="goal-bar-track"><div class="goal-bar-fill ' + barClass(pct) + '" style="width:' + pct + '%"></div></div>' +
-        '<div class="goal-bar-val" style="color:var(--' + barColor(pct) + ')">' + valStr + '</div>' +
-        '</div>';
-    }
-
-    var hcHtml = consumed.length > 0
-      ? '<div style="margin-top:10px;"><div class="brief-section-lbl">Hi Chef this week</div><div>' +
-        consumed.map(function(m){ return '<span class="hc-week-tag">' + m.day + ': ' + m.name + '</span>'; }).join('') +
-        '</div></div>'
-      : '';
-
-    document.getElementById('today-brief').innerHTML =
-      '<div class="brief-score">' +
-        '<div class="brief-ring ' + tierColor + '">' + score + '</div>' +
-        '<div><div class="brief-headline">' + tier + '</div>' +
-        '<div class="brief-sub">' + approach + '</div></div>' +
-      '</div>' +
-      '<div class="brief-metrics">' +
-        '<div class="brief-metric ' + sleepSt + '"><div class="brief-metric-val">' + h.sleep.hours + 'h</div><div class="brief-metric-lbl">Sleep</div></div>' +
-        '<div class="brief-metric ' + hrvSt   + '"><div class="brief-metric-val">' + (h.hrv || '—') + '</div><div class="brief-metric-lbl">HRV</div></div>' +
-        '<div class="brief-metric ' + stepsSt + '"><div class="brief-metric-val">' + stepsDisp + '</div><div class="brief-metric-lbl">Steps yest.</div></div>' +
-      '</div>' +
-      '<div class="brief-focus"><div class="brief-section-lbl">Focus today</div>' +
-        '<div class="brief-focus-text">' + focus.join('<br>') + '</div>' +
-      '</div>' +
-      '<div class="brief-section-lbl">Goals this week</div>' +
-      '<div>' +
-        goalBar('Workouts', wktPct, w.workoutsCompleted + '/' + g.weeklyWorkouts) +
-        goalBar('Sleep last night', slpPct, h.sleep.hours + 'h') +
-        goalBar('Steps yesterday', stpPct, stepsDisp) +
-      '</div>' +
-      hcHtml;
-  }
-  function renderToday() {
-    var now=new Date();
-    var dayNames=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-    var monNames=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    document.getElementById('today-date').textContent=
-      dayNames[now.getDay()]+', '+monNames[now.getMonth()]+' '+now.getDate();
-    var classes=getTodayClasses();
-    renderDaySummary(classes);
-    // Schedule
-    var sched=document.getElementById('today-schedule');
-    if(classes.length===0) {
-      sched.innerHTML='<div class="rest-msg">\uD83E\uDDD8 No classes today \u2014 rest day</div>';
-    } else {
-      sched.innerHTML=classes.map(function(c){
-        return '<div class="cls-item"><div class="cls-dot" style="background:'+c.color+'"></div>'+
-          '<div class="cls-time">'+c.time+'</div>'+
-          '<div><div class="cls-name">'+c.label+'</div>'+
-          '<div class="cls-studio">'+c.studio+'</div></div></div>';
-      }).join('');
-    }
-    // Meals
-    var plan=getMealPlan(classes);
-    document.getElementById('today-if-bar').textContent=
-      '\uD83D\uDD5B Eating window: '+plan.windowStr+' \u00B7 16:8 IF';
-    document.getElementById('today-meals').innerHTML=plan.slots.map(function(s){
-      return '<div class="meal-row"><div class="meal-time">'+s.time+'</div>'+
-        '<div class="meal-body"><div class="meal-title">'+s.title+'</div>'+
-        '<div class="meal-sub">'+s.sub+'</div>'+
-        (s.hc?'<div class="hc-tag">\uD83C\uDF7D Hi Chef: '+s.hc+'</div>':'')+
-        '</div></div>';
+function renderToday() {
+  var now=new Date();
+  var dayNames=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var monNames=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('today-date').textContent=dayNames[now.getDay()]+', '+monNames[now.getMonth()]+' '+now.getDate();
+  var classes=getTodayClasses();
+  renderDaySummary(classes);
+  // Schedule
+  var sched=document.getElementById('today-schedule');
+  if(classes.length===0){
+    sched.innerHTML='<div class="rest-msg">&#x1F9D8; No classes today \u2014 rest day</div>';
+  } else {
+    sched.innerHTML=classes.map(function(c){
+      return '<div class="cls-item"><div class="cls-dot" style="background:'+c.color+'"></div><div class="cls-time">'+c.time+'</div><div><div class="cls-name">'+c.label+'</div><div class="cls-studio">'+c.studio+'</div></div></div>';
     }).join('');
-    // Recovery
-    var rec=getRecoveryItems(classes);
-    var recEl=document.getElementById('today-recovery');
-    recEl.innerHTML=rec.items.map(function(item){
-      return '<div class="rec-row"><div>'+
-        '<div class="rec-label">'+item.label+'</div>'+
-        '<div class="rec-sub">'+item.sub+'</div>'+
-        '</div>'+(item.cta?'<div class="rec-cta">Book \u2192</div>':'')+
-        '</div>';
+  }
+  // Meals
+  var plan=getMealPlan(classes);
+  document.getElementById('today-if-bar').innerHTML='&#x1F55B; Eating window: '+plan.windowStr+' &middot; 16:8 IF';
+  document.getElementById('today-meals').innerHTML=plan.slots.map(function(s){
+    return '<div class="meal-row"><div class="meal-time">'+s.time+'</div><div class="meal-body"><div class="meal-title">'+s.title+'</div><div class="meal-sub">'+s.sub+'</div>'+s.tagHtml+'</div></div>';
+  }).join('');
+  // Recovery
+  var rec=getRecoveryItems(classes);
+  var recEl=document.getElementById('today-recovery');
+  recEl.innerHTML=rec.items.map(function(item){
+    return '<div class="rec-row"><div><div class="rec-label">'+item.label+'</div><div class="rec-sub">'+item.sub+'</div></div>'+(item.cta?'<div class="rec-cta">Book \u2192</div>':'')+'</div>';
+  }).join('');
+  if(rec.haven>0){
+    recEl.innerHTML+='<a href="https://myavant.club" target="_blank" style="text-decoration:none;display:block;"><div class="haven-banner"><div class="haven-banner-lhs"><div class="haven-banner-title">Core Recovery &middot; Avant Haven</div><div class="haven-banner-sub">Tap to book at myavant.club &rarr;</div></div><div class="haven-banner-num">'+rec.haven+'</div></div></a>';
+  }
+}
+
+async function doLogin() {
+  const input=document.getElementById('pass-input').value;
+  const hash=await sha256(input);
+  if(hash===PASS_HASH){sessionStorage.setItem('fc_auth','1');showDashboard();}
+  else{
+    const el=document.getElementById('pass-input');
+    el.classList.add('shake');
+    document.getElementById('login-error').textContent='Incorrect passcode';
+    setTimeout(function(){el.classList.remove('shake');el.value='';el.focus();},500);
+  }
+}
+
+function doLock() {
+  sessionStorage.removeItem('fc_auth');
+  document.getElementById('dashboard').classList.remove('visible');
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('pass-input').value='';
+  document.getElementById('login-error').textContent='';
+}
+
+function showDashboard() {
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('dashboard').classList.add('visible');
+  renderToday();
+  render();
+}
+
+document.getElementById('pass-input').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
+
+function daysUntil(dateStr) {
+  if(!dateStr) return null;
+  const today=new Date(); today.setHours(0,0,0,0);
+  return Math.ceil((new Date(dateStr)-today)/86400000);
+}
+
+function fmtDate(dateStr) {
+  if(!dateStr) return '\u2014';
+  return new Date(dateStr).toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+}
+
+/* FIX: Future dates are never red.
+   Only past/expired dates get 'urgent' (red).
+   Dates within 30 days but still future get 'warn' (yellow).
+   All other future dates get 'ok' (green). */
+function expiryClass(dateStr) {
+  const d=daysUntil(dateStr);
+  if(d===null) return '';
+  if(d<=0) return 'urgent';   // expired or today â red
+  if(d<30)  return 'warn';    // within 30 days but future â yellow
+  return 'ok';                // comfortably in future â green
+}
+
+function statusPill(credits,total) {
+  const pct=credits/total;
+  if(pct<=0.2) return ['status-low','Low'];
+  if(pct<=0.4) return ['status-warning','Running Low'];
+  return ['status-active','Active'];
+}
+
+function autoAdvanceRenewal(dateStr,intervalDays) {
+  const today=new Date(); today.setHours(0,0,0,0);
+  const d=new Date(dateStr);
+  while(d<=today) d.setDate(d.getDate()+(intervalDays||14));
+  return d.toISOString().slice(0,10);
+}
+
+/* hidePastClasses â auto-hides pills whose date/time has passed */
+function hidePastClasses() {
+  const now=new Date();
+  const monthNames=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const dayNames=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  document.querySelectorAll('.class-pill').forEach(function(pill) {
+    const text=pill.textContent.trim();
+    let dt=null;
+    // Format: "Mar 28 Â· 12:50pm ..." or "Sat Mar 28 Â· ..."
+    const fullMatch=text.match(/(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d{1,2})\s*[\xb7\-]\s*(\d{1,2}):?(\d{0,2})\s*(am|pm)/i);
+    if(fullMatch){
+      const mon=fullMatch[1],day=parseInt(fullMatch[2]);
+      let h=parseInt(fullMatch[3]),m=parseInt(fullMatch[4])||0;
+      const ap=fullMatch[5].toLowerCase();
+      const mi=monthNames.findIndex(function(x){return x.toLowerCase()===mon.toLowerCase();});
+      if(mi>=0){
+        if(ap==='pm'&&h!==12)h+=12; else if(ap==='am'&&h===12)h=0;
+        dt=new Date(now.getFullYear(),mi,day,h,m);
+        if(dt<now&&(now-dt)>180*24*3600000) dt.setFullYear(dt.getFullYear()+1);
+      }
+    }
+    if(dt&&dt<now) pill.style.display='none';
+  });
+}
+
+function render() {
+  const d=DATA;
+  const lu=new Date(d.lastUpdated);
+  document.getElementById('lastUpdated').textContent='Updated '+lu.toLocaleDateString('en-CA',{month:'short',day:'numeric'})+' at '+lu.toLocaleTimeString('en-CA',{hour:'numeric',minute:'2-digit'});
+
+  // Barry's
+  const [bClass,bLabel]=statusPill(d.barrys.credits,d.barrys.total);
+  document.getElementById('barrys-credits').textContent=d.barrys.credits;
+  document.getElementById('barrys-of').textContent='of '+d.barrys.total;
+  document.getElementById('barrys-bar').style.width=Math.round(d.barrys.credits/d.barrys.total*100)+'%';
+  const bExp=document.getElementById('barrys-expiry');
+  bExp.textContent=fmtDate(d.barrys.expiry); bExp.className='meta-value '+expiryClass(d.barrys.expiry);
+  const bStatus=document.getElementById('barrys-status');
+  bStatus.className='status-pill '+bClass; bStatus.textContent=bLabel;
+
+  // Barry's upcoming classes
+  const bClasses=document.getElementById('barrys-classes');
+  if(d.barrys.classes&&d.barrys.classes.length>0){
+    bClasses.innerHTML=d.barrys.classes.map(function(c){
+      var dateStr=c.date?new Date(c.date).toLocaleDateString('en-CA',{month:'short',day:'numeric'})+' \u00b7 ':'('+c.day+') ';
+      return '<div class="class-pill"><div class="class-dot" style="background:var(--barrys)"></div>'+dateStr+c.time+' '+c.label+'</div>';
     }).join('');
-    if(rec.haven>0) {
-      recEl.innerHTML+='<a href="https://myavant.club" target="_blank" style="text-decoration:none;display:block;"><div class="haven-banner">'+
-        '<div class="haven-banner-lhs">'+
-        '<div class="haven-banner-title">Core Recovery \u00B7 Avant Haven</div>'+
-        '<div class="haven-banner-sub">Tap to book at myavant.club \u2192</div>'+
-        '</div><div class="haven-banner-num">'+rec.haven+'</div></div></a>';
-    }
-  }
-  async function doLogin() {
-    const input = document.getElementById('pass-input').value;
-    const hash = await sha256(input);
-    if (hash === PASS_HASH) { sessionStorage.setItem('fc_auth', '1'); showDashboard(); }
-    else {
-      const el = document.getElementById('pass-input');
-      el.classList.add('shake');
-      document.getElementById('login-error').textContent = 'Incorrect passcode';
-      setTimeout(() => { el.classList.remove('shake'); el.value = ''; el.focus(); }, 500);
-    }
-  }
-  function doLock() {
-    sessionStorage.removeItem('fc_auth');
-    document.getElementById('dashboard').classList.remove('visible');
-    document.getElementById('login-screen').style.display = 'flex';
-    document.getElementById('pass-input').value = '';
-    document.getElementById('login-error').textContent = '';
-  }
-  function showDashboard() {
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('dashboard').classList.add('visible');
-    renderToday();
-    render();
-  }
-  document.getElementById('pass-input').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
-  function daysUntil(dateStr) {
-    if (!dateStr) return null;
-    const today = new Date(); today.setHours(0,0,0,0);
-    return Math.ceil((new Date(dateStr) - today) / 86400000);
-  }
-  function fmtDate(dateStr) {
-    if (!dateStr) return 'â';
-    return new Date(dateStr).toLocaleDateString('en-CA', { month:'short', day:'numeric', year:'numeric' });
-  }
-  function expiryClass(dateStr) {
-    const d = daysUntil(dateStr);
-    if (d === null) return '';
-    if (d < 30) return 'urgent';
-    if (d < 90) return 'warn';
-    return 'ok';
-  }
-  function statusPill(credits, total) {
-    const pct = credits / total;
-    if (pct <= 0.2) return ['status-low', 'Low'];
-    if (pct <= 0.4) return ['status-warning', 'Running Low'];
-    return ['status-active', 'Active'];
-  }
-  function autoAdvanceRenewal(dateStr, intervalDays) {
-    const today = new Date(); today.setHours(0,0,0,0);
-    const d = new Date(dateStr);
-    while (d <= today) d.setDate(d.getDate() + intervalDays);
-    return d.toISOString().slice(0, 10);
-  }
-  function hidePastClasses() {
-    const now = new Date();
-    const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-    document.querySelectorAll('.class-pill').forEach(function(pill) {
-      const text = pill.textContent.trim();
-      let dt = null;
-      const fullMatch = text.match(/(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d{1,2})\s*[\xb7\-]\s*(\d{1,2}):?(\d{0,2})\s*(am|pm)/i);
-      if (fullMatch) {
-        const mon = fullMatch[1], day = parseInt(fullMatch[2]);
-        let h = parseInt(fullMatch[3]), m = parseInt(fullMatch[4]) || 0;
-        const ap = fullMatch[5].toLowerCase();
-        const mi = monthNames.findIndex(function(x){return x.toLowerCase()===mon.toLowerCase();});
-        if (mi >= 0) {
-          if (ap==='pm' && h!==12) h+=12; else if (ap==='am' && h===12) h=0;
-          dt = new Date(now.getFullYear(), mi, day, h, m);
-          if (dt < now && (now-dt) > 180*24*3600000) dt.setFullYear(dt.getFullYear()+1);
-        }
-      }
-      if (!dt) {
-        const relMatch = text.match(/^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)\s+(\d{1,2}):?(\d{0,2})\s*(am|pm)/i);
-        if (relMatch) {
-          const td = dayNames.findIndex(function(d){return d.toLowerCase()===relMatch[1].toLowerCase();});
-          let h = parseInt(relMatch[2]), m = parseInt(relMatch[3]) || 0;
-          const ap = relMatch[4].toLowerCase();
-          if (ap==='pm' && h!==12) h+=12; else if (ap==='am' && h===12) h=0;
-          let diff = td - now.getDay(); if (diff < 0) diff += 7;
-          dt = new Date(now.getFullYear(), now.getMonth(), now.getDate()+diff, h, m);
-        }
-      }
-      if (dt && dt < now) pill.style.display = 'none';
-    });
-  }
-  function render() {
-    const d = DATA;
-    const lu = new Date(d.lastUpdated);
-    document.getElementById('lastUpdated').textContent = 'Updated ' + lu.toLocaleDateString('en-CA', { month:'short', day:'numeric' }) + ' at ' + lu.toLocaleTimeString('en-CA', { hour:'numeric', minute:'2-digit' });
-    const [bClass, bLabel] = statusPill(d.barrys.credits, d.barrys.total);
-    document.getElementById('barrys-credits').textContent = d.barrys.credits;
-    document.getElementById('barrys-of').textContent = 'of ' + d.barrys.total;
-    document.getElementById('barrys-bar').style.width = Math.round(d.barrys.credits / d.barrys.total * 100) + '%';
-    const bExp = document.getElementById('barrys-expiry'); bExp.textContent = fmtDate(d.barrys.expiry); bExp.className = 'meta-value ' + expiryClass(d.barrys.expiry);
-    const bStatus = document.getElementById('barrys-status'); bStatus.className = 'status-pill ' + bClass; bStatus.textContent = bLabel;
-    const [oClass, oLabel] = statusPill(d.othership.credits, d.othership.total);
-    document.getElementById('othership-credits').textContent = d.othership.credits;
-    document.getElementById('othership-of').textContent = 'of ' + d.othership.total;
-    document.getElementById('othership-bar').style.width = Math.round(d.othership.credits / d.othership.total * 100) + '%';
-    const oExp = document.getElementById('othership-expiry'); oExp.textContent = fmtDate(d.othership.expiry); oExp.className = 'meta-value ' + expiryClass(d.othership.expiry);
-    const oStatus = document.getElementById('othership-status'); oStatus.className = 'status-pill ' + oClass; oStatus.textContent = oLabel;
-    const nextRenewal = autoAdvanceRenewal(d.avant.nextRenewal, d.avant.renewalIntervalDays || 14);
-    const aRenewal = document.getElementById('avant-renewal'); aRenewal.textContent = fmtDate(nextRenewal); aRenewal.className = 'meta-value ' + expiryClass(nextRenewal);
-    const alignAvail = d.avant.align.available, alignTotal = d.avant.align.perCycle;
-    const havenAvail = d.avant.haven.available, havenTotal = d.avant.haven.perCycle;
-    document.getElementById('avant-align-count').textContent = alignAvail;
-    document.getElementById('avant-align-bar').style.width = Math.round(alignAvail / alignTotal * 100) + '%';
-    document.getElementById('avant-haven-count').textContent = havenAvail;
-    document.getElementById('avant-haven-bar').style.width = Math.round(havenAvail / havenTotal * 100) + '%';
-    const [rClass, rLabel] = statusPill(d.rumble.credits, d.rumble.total);
-    document.getElementById('rumble-credits').textContent = d.rumble.credits;
-    document.getElementById('rumble-of').textContent = 'of ' + d.rumble.total;
-    document.getElementById('rumble-bar').style.width = Math.round(d.rumble.credits / d.rumble.total * 100) + '%';
-    const rExp = document.getElementById('rumble-expiry'); rExp.textContent = fmtDate(d.rumble.expiry); rExp.className = 'meta-value ' + expiryClass(d.rumble.expiry);
-    const rStatus = document.getElementById('rumble-status'); rStatus.className = 'status-pill ' + rClass; rStatus.textContent = rLabel;
-    hidePastClasses();
-  }
-  if (sessionStorage.getItem('fc_auth') === '1') { showDashboard(); }
+  } else { bClasses.innerHTML='<div class="class-pill" style="color:var(--muted);font-style:italic">No upcoming classes</div>'; }
+
+  // Othership
+  const [oClass,oLabel]=statusPill(d.othership.credits,d.othership.total);
+  document.getElementById('othership-credits').textContent=d.othership.credits;
+  document.getElementById('othership-of').textContent='of '+d.othership.total;
+  document.getElementById('othership-bar').style.width=Math.round(d.othership.credits/d.othership.total*100)+'%';
+  const oExp=document.getElementById('othership-expiry');
+  oExp.textContent=fmtDate(d.othership.expiry); oExp.className='meta-value '+expiryClass(d.othership.expiry);
+  const oStatus=document.getElementById('othership-status');
+  oStatus.className='status-pill '+oClass; oStatus.textContent=oLabel;
+
+  // Othership upcoming classes
+  const oClasses=document.getElementById('othership-classes');
+  if(d.othership.classes&&d.othership.classes.length>0){
+    oClasses.innerHTML=d.othership.classes.map(function(c){
+      var dateStr=c.date?new Date(c.date).toLocaleDateString('en-CA',{month:'short',day:'numeric'})+' \u00b7 ':'('+c.day+') ';
+      return '<div class="class-pill"><div class="class-dot" style="background:var(--othership)"></div>'+dateStr+c.time+' '+c.label+'</div>';
+    }).join('');
+  } else { oClasses.innerHTML=''; }
+
+  // Avant
+  const nextRenewal=autoAdvanceRenewal(d.avant.nextRenewal,d.avant.renewalIntervalDays||14);
+  const aRenewal=document.getElementById('avant-renewal');
+  aRenewal.textContent=fmtDate(nextRenewal); aRenewal.className='meta-value '+expiryClass(nextRenewal);
+  document.getElementById('avant-align-count').textContent=d.avant.align.available;
+  document.getElementById('avant-align-bar').style.width=Math.round(d.avant.align.available/d.avant.align.perCycle*100)+'%';
+  document.getElementById('avant-haven-count').textContent=d.avant.haven.available;
+  document.getElementById('avant-haven-bar').style.width=Math.round(d.avant.haven.available/d.avant.haven.perCycle*100)+'%';
+
+  // Avant upcoming classes â dynamically rendered from DATA
+  const aClasses=document.getElementById('avant-classes');
+  if(d.avant.classes&&d.avant.classes.length>0){
+    aClasses.innerHTML=d.avant.classes.map(function(c){
+      var dateStr=c.date?new Date(c.date).toLocaleDateString('en-CA',{month:'short',day:'numeric'})+' \u00b7 ':'('+c.day+') ';
+      return '<div class="class-pill"><div class="class-dot" style="background:var(--avant)"></div>'+dateStr+c.time+' '+c.label+'</div>';
+    }).join('');
+  } else { aClasses.innerHTML='<div class="class-pill" style="color:var(--muted);font-style:italic">No upcoming classes</div>'; }
+
+  // Rumble
+  const [rClass,rLabel]=statusPill(d.rumble.credits,d.rumble.total);
+  document.getElementById('rumble-credits').textContent=d.rumble.credits;
+  document.getElementById('rumble-of').textContent='of '+d.rumble.total;
+  document.getElementById('rumble-bar').style.width=Math.round(d.rumble.credits/d.rumble.total*100)+'%';
+  const rExp=document.getElementById('rumble-expiry');
+  rExp.textContent=fmtDate(d.rumble.expiry); rExp.className='meta-value '+expiryClass(d.rumble.expiry);
+  const rStatus=document.getElementById('rumble-status');
+  rStatus.className='status-pill '+rClass; rStatus.textContent=rLabel;
+
+  hidePastClasses();
+}
+
+if(sessionStorage.getItem('fc_auth')==='1'){showDashboard();}
 </script>
 </body>
 </html>
