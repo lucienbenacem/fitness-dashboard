@@ -254,6 +254,12 @@
     if (pct <= 0.4) return ['status-warning', 'Running Low'];
     return ['status-active', 'Active'];
   }
+  function autoAdvanceRenewal(dateStr, intervalDays) {
+    const today = new Date(); today.setHours(0,0,0,0);
+    const d = new Date(dateStr);
+    while (d <= today) d.setDate(d.getDate() + intervalDays);
+    return d.toISOString().slice(0, 10);
+  }
   function hidePastClasses() {
     const now = new Date();
     const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -303,7 +309,8 @@
     document.getElementById('othership-bar').style.width = Math.round(d.othership.credits / d.othership.total * 100) + '%';
     const oExp = document.getElementById('othership-expiry'); oExp.textContent = fmtDate(d.othership.expiry); oExp.className = 'meta-value ' + expiryClass(d.othership.expiry);
     const oStatus = document.getElementById('othership-status'); oStatus.className = 'status-pill ' + oClass; oStatus.textContent = oLabel;
-    const aRenewal = document.getElementById('avant-renewal'); aRenewal.textContent = fmtDate(d.avant.nextRenewal); aRenewal.className = 'meta-value ' + expiryClass(d.avant.nextRenewal);
+    const nextRenewal = autoAdvanceRenewal(d.avant.nextRenewal, d.avant.renewalIntervalDays || 14);
+    const aRenewal = document.getElementById('avant-renewal'); aRenewal.textContent = fmtDate(nextRenewal); aRenewal.className = 'meta-value ' + expiryClass(nextRenewal);
     const alignAvail = d.avant.align.available, alignTotal = d.avant.align.perCycle;
     const havenAvail = d.avant.haven.available, havenTotal = d.avant.haven.perCycle;
     document.getElementById('avant-align-count').textContent = alignAvail;
